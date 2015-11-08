@@ -3,22 +3,22 @@ package alexjneves.droidify;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.EditText;
+import android.widget.TextView;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TrackSelectionActivity extends AppCompatActivity {
+    private File musicDirectory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track_selection);
 
+        setMusicDirectory(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
+
         try {
-            readTrackNames();
+            readTracks();
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -26,18 +26,19 @@ public class TrackSelectionActivity extends AppCompatActivity {
         }
     }
 
-    private void readTrackNames() throws Exception {
-        EditText numberOfTracks = (EditText) findViewById(R.id.text_numberOfTracks);
+    private void setMusicDirectory(File directory) {
+        musicDirectory = directory;
 
-        numberOfTracks.setText("Hello");
+        TextView musicDirectoryTextView = (TextView) findViewById(R.id.musicDirectory);
+        musicDirectoryTextView.setText(musicDirectory.getPath());
+    }
 
+    private void readTracks() throws Exception {
         if (!isExternalStorageReadable()) {
             throw new Exception("Unable to read external storage");
         }
 
-        File musicDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-
-        ReadTracksTask readTracksTask = new ReadTracksTask();
+        ReadTracksTask readTracksTask = new ReadTracksTask(this);
         readTracksTask.execute(musicDirectory);
     }
 
