@@ -1,6 +1,6 @@
 package alexjneves.droidify;
 
-public class DroidifyConstants {
+public final class DroidifyConstants {
     public static final String LogCategory = "DroidifyLog";
 
     // TODO: Programmatically retrieve supported audio types
