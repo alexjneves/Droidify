@@ -1,8 +1,12 @@
 package alexjneves.droidify;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -13,16 +17,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class TrackSelectionActivity extends AppCompatActivity implements ITrackListRetrievedListener {
+import alexjneves.droidify.service.DroidifyPlayerService;
+import alexjneves.droidify.service.IDroidifyPlayer;
+
+public final class TrackSelectionActivity extends AppCompatActivity implements ITrackListRetrievedListener, IDroidifyPlayerRetrievedListener {
     private static final String TRACK_LIST_VIEW_MAIN_TEXT = "title";
     private static final String TRACK_LIST_VIEW_SUB_TEXT = "artist";
 
-    private File musicDirectory;
+    private String musicDirectory;
     private ListView trackListView;
+    private IDroidifyPlayer droidifyPlayer;
+    private DroidifyPlayerServiceConnection droidifyPlayerServiceConnection;
 
     public TrackSelectionActivity() {
         musicDirectory = null;
         trackListView = null;
+        droidifyPlayer = null;
+        droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
     }
 
     @Override
@@ -32,27 +43,33 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         trackListView = (ListView) this.findViewById(R.id.trackList);
 
-        setMusicDirectory(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
+        setMusicDirectory(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
 
-        try {
-            retrieveTrackList();
-        } catch (Exception e) {
-            e.printStackTrace();
+        final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
+        // TODO: Investigate different bind constants
+        // TODO: Make foreground service
+        bindService(startDroidifyPlayerServiceIntent, droidifyPlayerServiceConnection, Context.BIND_AUTO_CREATE);
+    }
 
-            // Popup Window?
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (!droidifyPlayer.equals(null)) {
+            unbindService(droidifyPlayerServiceConnection);
         }
     }
 
-    private void setMusicDirectory(final File directory) {
+    private void setMusicDirectory(final String directory) {
         musicDirectory = directory;
 
         final TextView musicDirectoryTextView = (TextView) findViewById(R.id.musicDirectory);
-        musicDirectoryTextView.setText(musicDirectory.getPath());
+        musicDirectoryTextView.setText(musicDirectory);
     }
 
-    private void retrieveTrackList() throws Exception {
+    private void retrieveTrackList() {
         if (!isExternalStorageReadable()) {
-            throw new Exception("Unable to read external storage");
+            throw new RuntimeException("Unable to read external storage");
         }
 
         final RetrieveTrackListTask retrieveTrackListTask = new RetrieveTrackListTask(this);
@@ -68,13 +85,13 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
     @Override
     public void onTrackListRetrieved(final List<Track> tracks) {
-        final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks);
-        trackListView.setOnItemClickListener(onTrackClickListener);
+        populateTrackListView(tracks);
 
-        updateTrackListUi(tracks);
+        final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks, droidifyPlayer);
+        trackListView.setOnItemClickListener(onTrackClickListener);
     }
 
-    private void updateTrackListUi(final List<Track> tracks) {
+    private void populateTrackListView(final List<Track> tracks) {
         final List<Map<String, String>> trackListViewData = new ArrayList<>();
 
         for (Track track : tracks) {
@@ -88,12 +105,19 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
             trackListViewData.add(trackData);
         }
 
-        SimpleAdapter trackListViewAdapter = new SimpleAdapter(this, trackListViewData,
+        final SimpleAdapter trackListViewAdapter = new SimpleAdapter(this, trackListViewData,
                 android.R.layout.simple_list_item_2,
                 new String[] { TRACK_LIST_VIEW_MAIN_TEXT, TRACK_LIST_VIEW_SUB_TEXT },
                 new int[] { android.R.id.text1, android.R.id.text2 }
         );
 
         trackListView.setAdapter(trackListViewAdapter);
+    }
+
+    @Override
+    public void onDroidifyPlayerRetrieved(final IDroidifyPlayer droidifyPlayer) {
+        this.droidifyPlayer = droidifyPlayer;
+
+        retrieveTrackList();
     }
 }

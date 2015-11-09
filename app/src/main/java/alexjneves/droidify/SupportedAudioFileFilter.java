@@ -1,32 +1,29 @@
 package alexjneves.droidify;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class SupportedAudioFileFilter {
-    private final List<File> files;
+    private final List<String> filePaths;
 
-    public SupportedAudioFileFilter(List<File> files) {
-        this.files = files;
+    public SupportedAudioFileFilter(final List<String> filePaths) {
+        this.filePaths = filePaths;
     }
 
-    public List<File> getSupportedAudioFiles() {
-        List<File> supportedFiles = new ArrayList<>();
+    public List<String> getSupportedAudioFiles() {
+        List<String> supportedFiles = new ArrayList<>();
 
-        for (File file : files) {
-            if (isSupportedFile(file)) {
-                supportedFiles.add(file);
+        for (final String filePath : filePaths) {
+            if (isSupportedFile(filePath)) {
+                supportedFiles.add(filePath);
             }
         }
 
         return supportedFiles;
     }
 
-    public static boolean isSupportedFile(File file) {
-        final String fileName = file.getName();
-
-        final String[] split = fileName.split("\\.");
+    public static boolean isSupportedFile(final String filePath) {
+        final String[] split = filePath.split("\\.");
         final String fileExtension = split[split.length - 1];
 
         return fileExtension.equals(DroidifyConstants.SupportedAudioType);

@@ -1,19 +1,17 @@
 package alexjneves.droidify;
 
-import java.io.File;
-
 public final class AudioFile {
-    private final File file;
+    private final String filePath;
 
-    public AudioFile(File file) {
-        if (!SupportedAudioFileFilter.isSupportedFile(file)) {
+    public AudioFile(final String filePath) {
+        if (!SupportedAudioFileFilter.isSupportedFile(filePath)) {
             throw new RuntimeException("Unsupported file type - Must be an Android support audio file");
         }
 
-        this.file = file;
+        this.filePath = filePath;
     }
 
-    public File getFile() {
-        return file;
+    public String getPath() {
+        return filePath;
     }
 }

@@ -2,12 +2,14 @@ package alexjneves.droidify;
 
 import android.media.MediaMetadataRetriever;
 
+import java.io.File;
+
 public final class AudioFileMetadata {
     private final AudioFile audioFile;
     private final String title;
     private final String artist;
 
-    public AudioFileMetadata(AudioFile audioFile) {
+    public AudioFileMetadata(final AudioFile audioFile) {
         this.audioFile = audioFile;
 
         title = determineTitle();
@@ -15,15 +17,15 @@ public final class AudioFileMetadata {
     }
 
     private String determineTitle() {
-        final String name = audioFile.getFile().getName();
+        final String name = new File(audioFile.getPath()).getName();
 
-        final String[] withoutSuffix = name.split("\\.");
+        final String[] withoutExtension = name.split("\\.");
 
-        return withoutSuffix[0];
+        return withoutExtension[0];
     }
 
     private String determineArtist() {
-        final String trackPath = audioFile.getFile().getAbsolutePath();
+        final String trackPath = audioFile.getPath();
 
         final MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
         metadataRetriever.setDataSource(trackPath);

@@ -16,16 +16,4 @@ public final class Track {
     public AudioFileMetadata getMetadata() {
         return metadata;
     }
-
-    @Override
-    public String toString() {
-        String output = metadata.getTitle();
-        String artist = metadata.getArtist();
-
-        if (!artist.isEmpty()) {
-            output += " by " + artist;
-        }
-
-        return output;
-    }
 }

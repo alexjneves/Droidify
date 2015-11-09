@@ -19,7 +19,7 @@
         </activity>
 
         <service
-            android:name=".DroidifyPlayerService"
+            android:name=".service.DroidifyPlayerService"
             android:enabled="true"
             android:exported="true" >
         </service>
