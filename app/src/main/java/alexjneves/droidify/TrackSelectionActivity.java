@@ -21,25 +21,24 @@ import alexjneves.droidify.service.DroidifyPlayerService;
 import alexjneves.droidify.service.IDroidifyPlayer;
 
 public final class TrackSelectionActivity extends AppCompatActivity implements ITrackListRetrievedListener, IDroidifyPlayerRetrievedListener {
-    private static final String TRACK_LIST_VIEW_MAIN_TEXT = "title";
-    private static final String TRACK_LIST_VIEW_SUB_TEXT = "artist";
-
     private String musicDirectory;
     private ListView trackListView;
     private IDroidifyPlayer droidifyPlayer;
     private DroidifyPlayerServiceConnection droidifyPlayerServiceConnection;
+    private final TrackListViewAdapterFactory trackListViewAdapterFactory;
 
     public TrackSelectionActivity() {
         musicDirectory = null;
         trackListView = null;
         droidifyPlayer = null;
         droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
+        trackListViewAdapterFactory = new TrackListViewAdapterFactory();
     }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_track_selection);
+        this.setContentView(R.layout.activity_track_selection);
 
         trackListView = (ListView) this.findViewById(R.id.trackList);
 
@@ -48,7 +47,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
         // TODO: Investigate different bind constants
         // TODO: Make foreground service
-        bindService(startDroidifyPlayerServiceIntent, droidifyPlayerServiceConnection, Context.BIND_AUTO_CREATE);
+        this.bindService(startDroidifyPlayerServiceIntent, droidifyPlayerServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -56,7 +55,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         super.onDestroy();
 
         if (!droidifyPlayer.equals(null)) {
-            unbindService(droidifyPlayerServiceConnection);
+            this.unbindService(droidifyPlayerServiceConnection);
         }
     }
 
@@ -85,33 +84,11 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
     @Override
     public void onTrackListRetrieved(final List<Track> tracks) {
-        populateTrackListView(tracks);
+        final SimpleAdapter trackListViewAdapter = trackListViewAdapterFactory.createAdapter(this, tracks);
+        trackListView.setAdapter(trackListViewAdapter);
 
         final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks, droidifyPlayer);
         trackListView.setOnItemClickListener(onTrackClickListener);
-    }
-
-    private void populateTrackListView(final List<Track> tracks) {
-        final List<Map<String, String>> trackListViewData = new ArrayList<>();
-
-        for (Track track : tracks) {
-            final Map<String, String> trackData = new HashMap<>(2);
-
-            final AudioFileMetadata metadata = track.getMetadata();
-
-            trackData.put(TRACK_LIST_VIEW_MAIN_TEXT, metadata.getTitle());
-            trackData.put(TRACK_LIST_VIEW_SUB_TEXT, metadata.getArtist());
-
-            trackListViewData.add(trackData);
-        }
-
-        final SimpleAdapter trackListViewAdapter = new SimpleAdapter(this, trackListViewData,
-                android.R.layout.simple_list_item_2,
-                new String[] { TRACK_LIST_VIEW_MAIN_TEXT, TRACK_LIST_VIEW_SUB_TEXT },
-                new int[] { android.R.id.text1, android.R.id.text2 }
-        );
-
-        trackListView.setAdapter(trackListViewAdapter);
     }
 
     @Override
