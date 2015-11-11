@@ -18,10 +18,8 @@ public final class TrackListViewAdapterFactory {
         for (final Track track : tracks) {
             final Map<String, String> trackData = new HashMap<>(2);
 
-            final AudioFileMetadata metadata = track.getMetadata();
-
-            trackData.put(TRACK_LIST_VIEW_MAIN_TEXT, metadata.getTitle());
-            trackData.put(TRACK_LIST_VIEW_SUB_TEXT, metadata.getArtist());
+            trackData.put(TRACK_LIST_VIEW_MAIN_TEXT, track.getTitle());
+            trackData.put(TRACK_LIST_VIEW_SUB_TEXT, track.getArtist());
 
             trackListViewData.add(trackData);
         }

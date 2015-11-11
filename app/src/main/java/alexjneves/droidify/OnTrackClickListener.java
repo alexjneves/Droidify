@@ -20,7 +20,7 @@ public final class OnTrackClickListener implements AdapterView.OnItemClickListen
     public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
         final Track selectedTrack = tracks.get(position);
 
-        droidifyPlayer.changeTrack(selectedTrack.getAudioFile().getPath());
+        droidifyPlayer.changeTrack(selectedTrack.getResourcePath());
         droidifyPlayer.playCurrentTrack();
     }
 }

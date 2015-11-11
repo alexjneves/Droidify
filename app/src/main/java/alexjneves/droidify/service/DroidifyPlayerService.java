@@ -2,6 +2,7 @@ package alexjneves.droidify.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -13,13 +14,15 @@ import alexjneves.droidify.DroidifyConstants;
 
 public final class DroidifyPlayerService extends Service implements IDroidifyPlayer {
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
+    private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
+
     private DroidifyPlayerState droidifyPlayerState;
-    private List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
 
     public DroidifyPlayerService() {
-        droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder(this);
-        droidifyPlayerState = DroidifyPlayerState.PAUSED;
+        droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder();
         stateChangeListeners = new ArrayList<>();
+
+        droidifyPlayerState = DroidifyPlayerState.PAUSED;
     }
 
     @Nullable
@@ -56,5 +59,11 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     @Override
     public void registerStateChangeListener(final IDroidifyPlayerStateChangeListener droidifyPlayerStateChangeListener) {
         stateChangeListeners.add(droidifyPlayerStateChangeListener);
+    }
+
+    public final class DroidifyPlayerServiceBinder extends Binder {
+        public IDroidifyPlayer getDroidifyPlayer() {
+            return DroidifyPlayerService.this;
+        }
     }
 }

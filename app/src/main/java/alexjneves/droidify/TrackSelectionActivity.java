@@ -2,21 +2,13 @@ package alexjneves.droidify;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import alexjneves.droidify.service.DroidifyPlayerService;
 import alexjneves.droidify.service.IDroidifyPlayer;
@@ -46,8 +38,6 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         trackListView = (ListView) this.findViewById(R.id.trackList);
 
-        setMusicDirectory(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
-
         final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
         // TODO: Investigate different bind constants
         // TODO: Make foreground service
@@ -62,13 +52,6 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         if (droidifyPlayer != null) {
             this.unbindService(droidifyPlayerServiceConnection);
         }
-    }
-
-    private void setMusicDirectory(final String directory) {
-        musicDirectory = directory;
-
-        final TextView musicDirectoryTextView = (TextView) findViewById(R.id.musicDirectory);
-        musicDirectoryTextView.setText(musicDirectory);
     }
 
     @Override
@@ -91,18 +74,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     }
 
     private void retrieveTrackList() {
-        if (!isExternalStorageReadable()) {
-            throw new RuntimeException("Unable to read external storage");
-        }
-
-        final RetrieveTrackListTask retrieveTrackListTask = new RetrieveTrackListTask(this);
+        final RetrieveTrackListTask retrieveTrackListTask = new RetrieveTrackListTask(getContentResolver(), this);
         retrieveTrackListTask.execute(musicDirectory);
-    }
-
-    private boolean isExternalStorageReadable() {
-        final String currentState = Environment.getExternalStorageState();
-
-        return currentState.equals(Environment.MEDIA_MOUNTED) ||
-                currentState.equals(Environment.MEDIA_MOUNTED_READ_ONLY);
     }
 }
