@@ -22,7 +22,7 @@ public final class AudioFileMetadata {
 
         final String metadata = metadataRetriever.extractMetadata(dataToRetrieve);
 
-        if (metadata.equals(null)) {
+        if (metadata == null) {
             return defaultValue;
         }
 

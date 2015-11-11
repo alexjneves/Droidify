@@ -14,7 +14,7 @@ public final class RetrieveTrackListTask extends AsyncTask<String, Void, List<Tr
 
     @Override
     protected List<Track> doInBackground(final String... params) {
-        if (params.length <= 0 || params[0].equals(null)) {
+        if (params.length <= 0 || params[0] == null) {
             throw new RuntimeException("Root File not provided");
         }
 

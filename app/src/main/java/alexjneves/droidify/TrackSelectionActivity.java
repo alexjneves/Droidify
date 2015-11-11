@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -20,19 +21,22 @@ import java.util.Map;
 import alexjneves.droidify.service.DroidifyPlayerService;
 import alexjneves.droidify.service.IDroidifyPlayer;
 
-public final class TrackSelectionActivity extends AppCompatActivity implements ITrackListRetrievedListener, IDroidifyPlayerRetrievedListener {
+public final class TrackSelectionActivity extends AppCompatActivity implements IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener  {
+    private final TrackListViewAdapterFactory trackListViewAdapterFactory;
+
     private String musicDirectory;
     private ListView trackListView;
     private IDroidifyPlayer droidifyPlayer;
     private DroidifyPlayerServiceConnection droidifyPlayerServiceConnection;
-    private final TrackListViewAdapterFactory trackListViewAdapterFactory;
+    private TrackPlayPauseButton trackPlayPauseButton;
 
     public TrackSelectionActivity() {
+        trackListViewAdapterFactory = new TrackListViewAdapterFactory();
+
         musicDirectory = null;
         trackListView = null;
         droidifyPlayer = null;
-        droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
-        trackListViewAdapterFactory = new TrackListViewAdapterFactory();
+        trackPlayPauseButton = null;
     }
 
     @Override
@@ -47,6 +51,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
         // TODO: Investigate different bind constants
         // TODO: Make foreground service
+        droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
         this.bindService(startDroidifyPlayerServiceIntent, droidifyPlayerServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -54,7 +59,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     protected void onDestroy() {
         super.onDestroy();
 
-        if (!droidifyPlayer.equals(null)) {
+        if (droidifyPlayer != null) {
             this.unbindService(droidifyPlayerServiceConnection);
         }
     }
@@ -64,6 +69,25 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         final TextView musicDirectoryTextView = (TextView) findViewById(R.id.musicDirectory);
         musicDirectoryTextView.setText(musicDirectory);
+    }
+
+    @Override
+    public void onDroidifyPlayerRetrieved(final IDroidifyPlayer droidifyPlayer) {
+        this.droidifyPlayer = droidifyPlayer;
+
+        final Button playPauseButton = (Button) this.findViewById(R.id.playPauseButton);
+        trackPlayPauseButton = TrackPlayPauseButton.Create(this.droidifyPlayer, playPauseButton);
+
+        retrieveTrackList();
+    }
+
+    @Override
+    public void onTrackListRetrieved(final List<Track> tracks) {
+        final SimpleAdapter trackListViewAdapter = trackListViewAdapterFactory.createAdapter(this, tracks);
+        trackListView.setAdapter(trackListViewAdapter);
+
+        final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks, droidifyPlayer);
+        trackListView.setOnItemClickListener(onTrackClickListener);
     }
 
     private void retrieveTrackList() {
@@ -80,21 +104,5 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         return currentState.equals(Environment.MEDIA_MOUNTED) ||
                 currentState.equals(Environment.MEDIA_MOUNTED_READ_ONLY);
-    }
-
-    @Override
-    public void onTrackListRetrieved(final List<Track> tracks) {
-        final SimpleAdapter trackListViewAdapter = trackListViewAdapterFactory.createAdapter(this, tracks);
-        trackListView.setAdapter(trackListViewAdapter);
-
-        final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks, droidifyPlayer);
-        trackListView.setOnItemClickListener(onTrackClickListener);
-    }
-
-    @Override
-    public void onDroidifyPlayerRetrieved(final IDroidifyPlayer droidifyPlayer) {
-        this.droidifyPlayer = droidifyPlayer;
-
-        retrieveTrackList();
     }
 }

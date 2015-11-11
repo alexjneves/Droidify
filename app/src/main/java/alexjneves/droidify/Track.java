@@ -4,7 +4,7 @@ public final class Track {
     private final AudioFile audioFile;
     private final AudioFileMetadata metadata;
 
-    public Track(AudioFile audioFile, AudioFileMetadata metadata) {
+    public Track(final AudioFile audioFile, final AudioFileMetadata metadata) {
         this.audioFile = audioFile;
         this.metadata = metadata;
     }
