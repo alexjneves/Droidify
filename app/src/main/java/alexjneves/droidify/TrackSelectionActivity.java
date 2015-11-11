@@ -13,7 +13,7 @@ import java.util.List;
 import alexjneves.droidify.service.DroidifyPlayerService;
 import alexjneves.droidify.service.IDroidifyPlayer;
 
-public final class TrackSelectionActivity extends AppCompatActivity implements IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener  {
+public final class TrackSelectionActivity extends AppCompatActivity implements IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener, IRunOnUiThread {
     private final TrackListViewAdapterFactory trackListViewAdapterFactory;
 
     private String musicDirectory;
@@ -59,7 +59,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         this.droidifyPlayer = droidifyPlayer;
 
         final Button playPauseButton = (Button) this.findViewById(R.id.playPauseButton);
-        trackPlayPauseButton = TrackPlayPauseButton.Create(this.droidifyPlayer, playPauseButton);
+        trackPlayPauseButton = TrackPlayPauseButton.Create(this.droidifyPlayer, playPauseButton, this);
 
         retrieveTrackList();
     }
@@ -76,5 +76,10 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     private void retrieveTrackList() {
         final RetrieveTrackListTask retrieveTrackListTask = new RetrieveTrackListTask(getContentResolver(), this);
         retrieveTrackListTask.execute(musicDirectory);
+    }
+
+    @Override
+    public void run(final Runnable toRun) {
+        this.runOnUiThread(toRun);
     }
 }

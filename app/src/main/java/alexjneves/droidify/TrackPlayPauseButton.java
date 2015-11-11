@@ -10,12 +10,13 @@ import alexjneves.droidify.service.IDroidifyPlayerStateChangeListener;
 public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeListener, View.OnClickListener {
     private final IDroidifyPlayer droidifyPlayer;
     private final Button uiButton;
+    private final IRunOnUiThread runOnUiThread;
 
     private DroidifyPlayerState currentState;
     private boolean awaitingStateUpdate;
 
-    static TrackPlayPauseButton Create(final IDroidifyPlayer droidifyPlayer, final Button uiButton) {
-        final TrackPlayPauseButton trackPlayPauseButton = new TrackPlayPauseButton(droidifyPlayer, uiButton);
+    static TrackPlayPauseButton Create(final IDroidifyPlayer droidifyPlayer, final Button uiButton, final IRunOnUiThread runOnUiThread) {
+        final TrackPlayPauseButton trackPlayPauseButton = new TrackPlayPauseButton(droidifyPlayer, uiButton, runOnUiThread);
 
         droidifyPlayer.registerStateChangeListener(trackPlayPauseButton);
         uiButton.setOnClickListener(trackPlayPauseButton);
@@ -23,9 +24,10 @@ public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeLis
         return trackPlayPauseButton;
     }
 
-    private TrackPlayPauseButton(final IDroidifyPlayer droidifyPlayer, final Button uiButton) {
+    private TrackPlayPauseButton(final IDroidifyPlayer droidifyPlayer, final Button uiButton, final IRunOnUiThread runOnUiThread) {
         this.droidifyPlayer = droidifyPlayer;
         this.uiButton = uiButton;
+        this.runOnUiThread = runOnUiThread;
 
         currentState = DroidifyPlayerState.PAUSED;
         awaitingStateUpdate = false;
@@ -38,10 +40,10 @@ public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeLis
 
         switch (newState) {
             case PAUSED:
-                // updateButtonUi(pausedButtonResourceId);
+                updateButtonUi(R.drawable.play_button);
                 break;
             case PLAYING:
-                // updateButtonUi(playButtonResourceId);
+                updateButtonUi(R.drawable.pause_button);
                 break;
             default:
                 break;
@@ -69,7 +71,13 @@ public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeLis
     }
 
     private void updateButtonUi(final int resourceId) {
-        // TODO: DO ON UI THREAD
-        uiButton.setBackgroundResource(resourceId);
+        final Runnable updateButtonUi = new Runnable() {
+            @Override
+            public void run() {
+                uiButton.setBackgroundResource(resourceId);
+            }
+        };
+
+        runOnUiThread.run(updateButtonUi);
     }
 }
