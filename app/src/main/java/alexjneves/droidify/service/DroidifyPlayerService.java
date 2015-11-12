@@ -16,7 +16,7 @@ import java.util.List;
 
 import alexjneves.droidify.DroidifyConstants;
 
-public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnPreparedListener {
+public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
     private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
     private final MediaPlayer mediaPlayer;
@@ -41,6 +41,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     public void onCreate() {
         super.onCreate();
         mediaPlayer.setOnPreparedListener(this);
+        mediaPlayer.setOnCompletionListener(this);
     }
 
     @Override
@@ -121,6 +122,12 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     private void resetMediaPlayer() {
         mediaPlayer.stop();
         mediaPlayer.reset();
+    }
+
+    @Override
+    public void onCompletion(final MediaPlayer mp) {
+        changeState(DroidifyPlayerState.STOPPED);
+        resetMediaPlayer();
     }
 
     public final class DroidifyPlayerServiceBinder extends Binder {

@@ -39,6 +39,7 @@ public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeLis
         awaitingStateUpdate = false;
 
         switch (newState) {
+            case STOPPED:
             case PAUSED:
                 updateButtonUi(R.drawable.play_button);
                 break;
