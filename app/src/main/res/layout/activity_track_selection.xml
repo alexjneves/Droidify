@@ -17,7 +17,9 @@
         android:layout_height="420dp"
         android:id="@+id/trackList"
         android:layout_alignTop="@+id/musicDirectory"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true"
+        android:choiceMode="singleChoice"
+        android:listSelector="@drawable/list_view_selector"/>
 
     <Button
         android:layout_width="20dp"
