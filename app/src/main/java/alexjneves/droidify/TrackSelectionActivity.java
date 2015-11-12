@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -37,11 +38,11 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         this.setContentView(R.layout.activity_track_selection);
 
         trackListView = (ListView) this.findViewById(R.id.trackList);
+        droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
 
-        final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
         // TODO: Investigate different bind constants
         // TODO: Make foreground service
-        droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
+        final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
         this.bindService(startDroidifyPlayerServiceIntent, droidifyPlayerServiceConnection, Context.BIND_AUTO_CREATE);
     }
 

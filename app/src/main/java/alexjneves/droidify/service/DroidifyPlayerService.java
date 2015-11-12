@@ -38,29 +38,31 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onCreate() {
+        super.onCreate();
         mediaPlayer.setOnPreparedListener(this);
-        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        resetMediaPlayer();
     }
 
     @Nullable
     @Override
     public IBinder onBind(final Intent intent) {
-        mediaPlayer.setOnPreparedListener(this);
-
         return droidifyPlayerServiceBinder;
     }
 
     @Override
-    public void changeTrack(final String filePath) {
-        Log.d(DroidifyConstants.LogCategory, "Change Track: " + filePath);
+    public void changeTrack(final String resourcePath) {
+        Log.d(DroidifyConstants.LogCategory, "Change Track: " + resourcePath);
 
         changeState(DroidifyPlayerState.PREPARING);
+        currentTrack = Uri.parse(resourcePath);
 
-        currentTrack = Uri.parse(filePath);
-
-        mediaPlayer.stop();
-        mediaPlayer.reset();
+        resetMediaPlayer();
 
         try {
             mediaPlayer.setDataSource(getApplicationContext(), currentTrack);
@@ -81,7 +83,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         } else if (droidifyPlayerState == DroidifyPlayerState.PREPARING) {
             awaitingPlayback = true;
         }
-
     }
 
     @Override
@@ -91,14 +92,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         if (droidifyPlayerState == DroidifyPlayerState.PLAYING) {
             mediaPlayer.pause();
             changeState(DroidifyPlayerState.PAUSED);
-        }
-    }
-
-    private void changeState(final DroidifyPlayerState newState) {
-        droidifyPlayerState = newState;
-
-        for (final IDroidifyPlayerStateChangeListener stateChangeListener : stateChangeListeners) {
-            stateChangeListener.onDroidifyPlayerStateChange(droidifyPlayerState);
         }
     }
 
@@ -115,6 +108,19 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
             awaitingPlayback = false;
             playCurrentTrack();
         }
+    }
+
+    private void changeState(final DroidifyPlayerState newState) {
+        droidifyPlayerState = newState;
+
+        for (final IDroidifyPlayerStateChangeListener stateChangeListener : stateChangeListeners) {
+            stateChangeListener.onDroidifyPlayerStateChange(droidifyPlayerState);
+        }
+    }
+
+    private void resetMediaPlayer() {
+        mediaPlayer.stop();
+        mediaPlayer.reset();
     }
 
     public final class DroidifyPlayerServiceBinder extends Binder {
