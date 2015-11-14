@@ -4,8 +4,8 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import alexjneves.droidify.service.DroidifyPlayerService;
 import alexjneves.droidify.service.IDroidifyPlayer;
+import alexjneves.droidify.service.IDroidifyPlayerServiceBinder;
 
 public final class DroidifyPlayerServiceConnection implements ServiceConnection {
     private final IDroidifyPlayerRetrievedListener droidifyPlayerRetrievedListener;
@@ -16,7 +16,7 @@ public final class DroidifyPlayerServiceConnection implements ServiceConnection 
 
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
-        final DroidifyPlayerService.DroidifyPlayerServiceBinder droidifyPlayerServiceBinder = (DroidifyPlayerService.DroidifyPlayerServiceBinder) service;
+        final IDroidifyPlayerServiceBinder droidifyPlayerServiceBinder = (IDroidifyPlayerServiceBinder) service;
         final IDroidifyPlayer droidifyPlayer = droidifyPlayerServiceBinder.getDroidifyPlayer();
 
         droidifyPlayerRetrievedListener.onDroidifyPlayerRetrieved(droidifyPlayer);

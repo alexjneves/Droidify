@@ -130,7 +130,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         resetMediaPlayer();
     }
 
-    public final class DroidifyPlayerServiceBinder extends Binder {
+    final class DroidifyPlayerServiceBinder extends Binder implements IDroidifyPlayerServiceBinder {
         public IDroidifyPlayer getDroidifyPlayer() {
             return DroidifyPlayerService.this;
         }

@@ -29,7 +29,7 @@ public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeLis
         this.uiButton = uiButton;
         this.runOnUiThread = runOnUiThread;
 
-        currentState = DroidifyPlayerState.PAUSED;
+        currentState = DroidifyPlayerState.STOPPED;
         awaitingStateUpdate = false;
     }
 
@@ -79,6 +79,6 @@ public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeLis
             }
         };
 
-        runOnUiThread.run(updateButtonUi);
+        runOnUiThread.executeOnUiThread(updateButtonUi);
     }
 }

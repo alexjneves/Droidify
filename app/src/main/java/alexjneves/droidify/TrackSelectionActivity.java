@@ -2,12 +2,11 @@ package alexjneves.droidify;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
+import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import java.util.List;
 
@@ -18,18 +17,18 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     private final TrackListViewAdapterFactory trackListViewAdapterFactory;
 
     private String musicDirectory;
-    private ListView trackListView;
     private IDroidifyPlayer droidifyPlayer;
     private DroidifyPlayerServiceConnection droidifyPlayerServiceConnection;
     private TrackPlayPauseButton trackPlayPauseButton;
+    private TrackListView trackListView;
 
     public TrackSelectionActivity() {
         trackListViewAdapterFactory = new TrackListViewAdapterFactory();
 
         musicDirectory = null;
-        trackListView = null;
         droidifyPlayer = null;
         trackPlayPauseButton = null;
+        trackListView = null;
     }
 
     @Override
@@ -37,7 +36,6 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_track_selection);
 
-        trackListView = (ListView) this.findViewById(R.id.trackList);
         droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
 
         // TODO: Investigate different bind constants
@@ -67,11 +65,14 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
     @Override
     public void onTrackListRetrieved(final List<Track> tracks) {
-        final SimpleAdapter trackListViewAdapter = trackListViewAdapterFactory.createAdapter(this, tracks);
-        trackListView.setAdapter(trackListViewAdapter);
-
+        final ListView trackListViewUi = (ListView) this.findViewById(R.id.trackList);
+        final ListAdapter trackListViewAdapter = trackListViewAdapterFactory.createAdapter(this, tracks);
         final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks, droidifyPlayer);
-        trackListView.setOnItemClickListener(onTrackClickListener);
+
+        this.trackListView = new TrackListView(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this);
+
+        this.trackListView.changeSelection(0);
+        droidifyPlayer.changeTrack(tracks.get(0).getResourcePath());
     }
 
     private void retrieveTrackList() {
@@ -80,7 +81,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     }
 
     @Override
-    public void run(final Runnable toRun) {
+    public void executeOnUiThread(final Runnable toRun) {
         this.runOnUiThread(toRun);
     }
 }

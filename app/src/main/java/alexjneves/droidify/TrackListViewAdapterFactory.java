@@ -1,6 +1,7 @@
 package alexjneves.droidify;
 
 import android.content.Context;
+import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public final class TrackListViewAdapterFactory {
     private static final String TRACK_LIST_VIEW_MAIN_TEXT = "title";
     private static final String TRACK_LIST_VIEW_SUB_TEXT = "artist";
 
-    public SimpleAdapter createAdapter(final Context context, final List<Track> tracks) {
+    public ListAdapter createAdapter(final Context context, final List<Track> tracks) {
         final List<Map<String, String>> trackListViewData = new ArrayList<>();
 
         for (final Track track : tracks) {

@@ -15,7 +15,8 @@
         android:layout_alignParentStart="true"
         android:choiceMode="singleChoice"
         android:listSelector="@drawable/list_view_selector"
-        android:layout_marginBottom="40dp"/>
+        android:layout_marginBottom="40dp"
+        android:clickable="true" />
 
 
     <LinearLayout
