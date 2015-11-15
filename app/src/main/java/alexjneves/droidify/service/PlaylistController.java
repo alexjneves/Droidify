@@ -8,21 +8,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-final class PlaybackTrackQueue implements MediaPlayer.OnCompletionListener {
+final class PlaylistController implements MediaPlayer.OnCompletionListener {
     private final Context applicationContext;
-    private final Map<String, PlayableTrack> queuedTracks;
+    private final Map<String, PlayableTrack> playableTrackMap;
+    private final List<PlayableTrack> playableTracks;
 
-    private PlayableTrack currentTrack;
     private List<MediaPlayer.OnCompletionListener> onCompletionListeners;
+    private PlayableTrack currentTrack;
+    private int currentTrackIndex;
 
-    public PlaybackTrackQueue(final List<String> resourcePaths, final Context applicationContext) {
+    public PlaylistController(final List<String> resourcePaths, final Context applicationContext) {
         this.applicationContext = applicationContext;
-        this.queuedTracks = new HashMap<>();
-        currentTrack = null;
-        onCompletionListeners = new ArrayList<>();
-
-        final List<PlayableTrack> playableTracks = createPlayableTracks(resourcePaths);
-        //linkTracks(playableTracks);
+        this.playableTrackMap = new HashMap<>();
+        this.playableTracks = createPlayableTracks(resourcePaths);
+        this.onCompletionListeners = new ArrayList<>();
+        this.currentTrack = null;
+        this.currentTrackIndex = 0;
     }
 
     public void changeTrack(final String resourcePath) {
@@ -30,7 +31,8 @@ final class PlaybackTrackQueue implements MediaPlayer.OnCompletionListener {
             currentTrack.stop();
         }
 
-        currentTrack = queuedTracks.get(resourcePath);
+        currentTrack = playableTrackMap.get(resourcePath);
+        currentTrackIndex = playableTracks.indexOf(currentTrack);
     }
 
     public void playCurrentTrack() {
@@ -43,12 +45,24 @@ final class PlaybackTrackQueue implements MediaPlayer.OnCompletionListener {
         currentTrack.pause();
     }
 
-    public void skipForward() {
+    public PlayableTrack getNextTrack() {
+        int nextTrackIndex = currentTrackIndex + 1;
 
+        if (nextTrackIndex == playableTracks.size()) {
+            nextTrackIndex = 0;
+        }
+
+        return playableTracks.get(nextTrackIndex);
     }
 
-    public void skipBackward() {
+    public PlayableTrack getPreviousTrack() {
+        int previousTrackIndex = currentTrackIndex - 1;
 
+        if (previousTrackIndex < 0) {
+            previousTrackIndex = playableTracks.size() - 1;
+        }
+
+        return playableTracks.get(previousTrackIndex);
     }
 
     public void setVolume(final float volume) {
@@ -60,7 +74,7 @@ final class PlaybackTrackQueue implements MediaPlayer.OnCompletionListener {
     }
 
     public void cleanUp() {
-        for (final Map.Entry<String, PlayableTrack> playableTrackEntry : queuedTracks.entrySet()) {
+        for (final Map.Entry<String, PlayableTrack> playableTrackEntry : playableTrackMap.entrySet()) {
             playableTrackEntry.getValue().stop();
         }
     }
@@ -73,7 +87,7 @@ final class PlaybackTrackQueue implements MediaPlayer.OnCompletionListener {
             playableTrack.registerOnCompletionListener(this);
 
             playableTracks.add(playableTrack);
-            queuedTracks.put(resourcePath, playableTrack);
+            playableTrackMap.put(resourcePath, playableTrack);
         }
 
         return playableTracks;

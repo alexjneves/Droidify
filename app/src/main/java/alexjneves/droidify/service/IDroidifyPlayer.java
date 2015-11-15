@@ -7,5 +7,7 @@ public interface IDroidifyPlayer {
     void changePlaylist(final List<String> resourcePaths);
     void playCurrentTrack();
     void pauseCurrentTrack();
+    void skipForward();
+    void skipBackward();
     void registerStateChangeListener(final IDroidifyPlayerStateChangeListener droidifyPlayerStateChangeListener);
 }

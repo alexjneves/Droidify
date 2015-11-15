@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -63,7 +64,8 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         final Button playPauseButton = (Button) this.findViewById(R.id.playPauseButton);
         trackPlayPauseButton = TrackPlayPauseButton.Create(this.droidifyPlayer, playPauseButton, this);
 
-        retrieveTrackList();
+        final RetrieveTrackListTask retrieveTrackListTask = new RetrieveTrackListTask(getContentResolver(), this);
+        retrieveTrackListTask.execute(musicDirectory);
     }
 
     @Override
@@ -86,13 +88,16 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         droidifyPlayer.changeTrack(tracks.get(0).getResourcePath());
     }
 
-    private void retrieveTrackList() {
-        final RetrieveTrackListTask retrieveTrackListTask = new RetrieveTrackListTask(getContentResolver(), this);
-        retrieveTrackListTask.execute(musicDirectory);
-    }
-
     @Override
     public void executeOnUiThread(final Runnable toRun) {
         this.runOnUiThread(toRun);
+    }
+
+    public void onBackwardButtonClick(final View view) {
+        droidifyPlayer.skipBackward();
+    }
+
+    public void onForwardButtonClick(final View view) {
+        droidifyPlayer.skipForward();
     }
 }

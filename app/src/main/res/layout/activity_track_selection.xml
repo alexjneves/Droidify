@@ -36,7 +36,8 @@
                 android:id="@+id/backwardButton"
                 android:background="@drawable/backward_button"
                 android:layout_marginBottom="2dp"
-                android:layout_marginTop="2dp" />
+                android:layout_marginTop="2dp"
+                android:onClick="onBackwardButtonClick" />
         </LinearLayout>
 
         <LinearLayout
@@ -67,7 +68,8 @@
             android:id="@+id/forwardButton"
             android:background="@drawable/forward_button"
             android:layout_marginBottom="2dp"
-            android:layout_marginTop="2dp" />
+            android:layout_marginTop="2dp"
+            android:onClick="onForwardButtonClick" />
         </LinearLayout>
     </LinearLayout>
 
