@@ -80,7 +80,8 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         try {
             mediaPlayer.setDataSource(getApplicationContext(), currentTrack);
         } catch (final IOException ex) {
-            // TODO: Handle
+            changeState(DroidifyPlayerState.ERROR);
+            return;
         }
 
         droidifyPlayerServiceNotificationFactory = new DroidifyPlayerServiceNotificationFactory(resourcePath, getApplicationContext());
@@ -132,6 +133,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         changeState(DroidifyPlayerState.STOPPED);
         this.stopForeground(true);
         resetMediaPlayer();
+        audioManager.abandonAudioFocus(this);
     }
 
     @Override
