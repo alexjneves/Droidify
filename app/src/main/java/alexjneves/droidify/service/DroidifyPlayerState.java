@@ -4,5 +4,6 @@ public enum DroidifyPlayerState {
     STOPPED,
     PREPARING,
     PAUSED,
-    PLAYING
+    PLAYING,
+    ERROR
 }

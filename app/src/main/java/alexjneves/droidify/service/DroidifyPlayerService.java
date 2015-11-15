@@ -2,6 +2,7 @@ package alexjneves.droidify.service;
 
 import android.app.Notification;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -10,16 +11,16 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import alexjneves.droidify.DroidifyConstants;
-
-public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener {
+    private final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
     private final int DROIDIFY_PLAYER_SERVICE_NOTIFICATION_ID = 1;
+    public static final float MAX_VOLUME = 1.0f;
+    private final float MIN_VOLUME = 1.0f;
 
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
     private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
@@ -27,7 +28,9 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
     private Uri currentTrack;
     private DroidifyPlayerServiceNotificationFactory droidifyPlayerServiceNotificationFactory;
+    private AudioManager audioManager;
     private DroidifyPlayerState droidifyPlayerState;
+    private int previousAudioFocusState;
     private boolean awaitingPlayback;
 
     public DroidifyPlayerService() {
@@ -37,13 +40,17 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
         currentTrack = null;
         droidifyPlayerServiceNotificationFactory = null;
+        audioManager = null;
         droidifyPlayerState = DroidifyPlayerState.STOPPED;
+        previousAudioFocusState = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         awaitingPlayback = false;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -65,8 +72,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
     @Override
     public void changeTrack(final String resourcePath) {
-        Log.d(DroidifyConstants.LogCategory, "Change Track: " + resourcePath);
-
         changeState(DroidifyPlayerState.PREPARING);
         currentTrack = Uri.parse(resourcePath);
 
@@ -84,9 +89,12 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
     @Override
     public void playCurrentTrack() {
-        Log.d(DroidifyConstants.LogCategory, "Player Play");
-
         if (droidifyPlayerState == DroidifyPlayerState.PAUSED) {
+            if (!requestAudioFocus()) {
+                changeState(DroidifyPlayerState.ERROR);
+                return;
+            }
+
             mediaPlayer.start();
             pushNotification(droidifyPlayerServiceNotificationFactory.playingNotification());
             changeState(DroidifyPlayerState.PLAYING);
@@ -97,17 +105,11 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
     @Override
     public void pauseCurrentTrack() {
-        Log.d(DroidifyConstants.LogCategory, "Player Pause");
-
         if (droidifyPlayerState == DroidifyPlayerState.PLAYING) {
             mediaPlayer.pause();
             pushNotification(droidifyPlayerServiceNotificationFactory.pausedNotification());
             changeState(DroidifyPlayerState.PAUSED);
         }
-    }
-
-    private void pushNotification(final Notification notification) {
-        this.startForeground(DROIDIFY_PLAYER_SERVICE_NOTIFICATION_ID, notification);
     }
 
     @Override
@@ -125,6 +127,37 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         }
     }
 
+    @Override
+    public void onCompletion(final MediaPlayer mediaPlayer) {
+        changeState(DroidifyPlayerState.STOPPED);
+        this.stopForeground(true);
+        resetMediaPlayer();
+    }
+
+    @Override
+    public void onAudioFocusChange(final int focusChange) {
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                mediaPlayer.setVolume(MAX_VOLUME, MAX_VOLUME);
+
+                if (previousAudioFocusState != AudioManager.AUDIOFOCUS_LOSS) {
+                    playCurrentTrack();
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                pauseCurrentTrack();
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                mediaPlayer.setVolume(MIN_VOLUME, MIN_VOLUME);
+                break;
+            default:
+                break;
+        }
+
+        previousAudioFocusState = focusChange;
+    }
+
     private void changeState(final DroidifyPlayerState newState) {
         droidifyPlayerState = newState;
 
@@ -133,16 +166,19 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         }
     }
 
+    private void pushNotification(final Notification notification) {
+        this.startForeground(DROIDIFY_PLAYER_SERVICE_NOTIFICATION_ID, notification);
+    }
+
+    private boolean requestAudioFocus() {
+        final int audioFocusRequestResult = audioManager.requestAudioFocus(this, STREAM_TYPE, AudioManager.AUDIOFOCUS_GAIN);
+
+        return audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
     private void resetMediaPlayer() {
         mediaPlayer.stop();
         mediaPlayer.reset();
-    }
-
-    @Override
-    public void onCompletion(final MediaPlayer mediaPlayer) {
-        changeState(DroidifyPlayerState.STOPPED);
-        this.stopForeground(true);
-        resetMediaPlayer();
     }
 
     final class DroidifyPlayerServiceBinder extends Binder implements IDroidifyPlayerServiceBinder {
