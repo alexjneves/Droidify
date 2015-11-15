@@ -69,7 +69,7 @@ final class PlaybackTrackQueue implements MediaPlayer.OnCompletionListener {
         final List<PlayableTrack> playableTracks = new ArrayList<>();
 
         for (final String resourcePath : resourcePaths) {
-            final PlayableTrack playableTrack = PlayableTrack.Create(resourcePath, this.applicationContext);
+            final PlayableTrack playableTrack = new PlayableTrack(resourcePath, this.applicationContext);
             playableTrack.registerOnCompletionListener(this);
 
             playableTracks.add(playableTrack);

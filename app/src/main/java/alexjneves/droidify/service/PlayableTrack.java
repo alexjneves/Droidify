@@ -12,11 +12,7 @@ final class PlayableTrack implements MediaPlayer.OnCompletionListener {
     private MediaPlayer mediaPlayer;
     private boolean initialized;
 
-    public static PlayableTrack Create(final String resourcePath, final Context applicationContext) {
-        return new PlayableTrack(resourcePath, applicationContext);
-    }
-
-    private PlayableTrack(final String resourcePath, final Context applicationContext) {
+    public PlayableTrack(final String resourcePath, final Context applicationContext) {
         this.onCompletionListeners = new ArrayList<>();
         this.mediaPlayerFactory = new MediaPlayerFactory(applicationContext, resourcePath);
         this.mediaPlayer = new MediaPlayer();

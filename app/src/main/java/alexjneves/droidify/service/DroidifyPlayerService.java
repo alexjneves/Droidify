@@ -26,6 +26,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     private DroidifyPlayerServiceNotificationFactory droidifyPlayerServiceNotificationFactory;
     private AudioManager audioManager;
     private PlaybackTrackQueue playbackTrackQueue;
+    private DroidifyPlayerServiceNotifier droidifyPlayerServiceNotifier;
     private DroidifyPlayerState droidifyPlayerState;
     private int previousAudioFocusState;
 
@@ -36,6 +37,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         droidifyPlayerServiceNotificationFactory = null;
         audioManager = null;
         playbackTrackQueue = null;
+        droidifyPlayerServiceNotifier = null;
         droidifyPlayerState = DroidifyPlayerState.STOPPED;
         previousAudioFocusState = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
     }
@@ -64,7 +66,10 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
             return;
         }
 
-        droidifyPlayerServiceNotificationFactory = new DroidifyPlayerServiceNotificationFactory(resourcePath, getApplicationContext());
+        final DroidifyPlayerServiceNotificationFactory droidifyPlayerServiceNotificationFactory = new DroidifyPlayerServiceNotificationFactory(resourcePath, getApplicationContext());
+
+        droidifyPlayerServiceNotifier = new DroidifyPlayerServiceNotifier(droidifyPlayerServiceNotificationFactory, this);
+
         playbackTrackQueue.changeTrack(resourcePath);
         changeState(DroidifyPlayerState.PAUSED);
     }
@@ -84,7 +89,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
             }
 
             playbackTrackQueue.playCurrentTrack();
-            pushNotification(droidifyPlayerServiceNotificationFactory.playingNotification());
             changeState(DroidifyPlayerState.PLAYING);
         }
     }
@@ -93,7 +97,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     public void pauseCurrentTrack() {
         if (droidifyPlayerState == DroidifyPlayerState.PLAYING) {
             playbackTrackQueue.pauseCurrentTrack();
-            pushNotification(droidifyPlayerServiceNotificationFactory.pausedNotification());
             changeState(DroidifyPlayerState.PAUSED);
         }
     }
@@ -140,10 +143,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         for (final IDroidifyPlayerStateChangeListener stateChangeListener : stateChangeListeners) {
             stateChangeListener.onDroidifyPlayerStateChange(droidifyPlayerState);
         }
-    }
-
-    private void pushNotification(final Notification notification) {
-        this.startForeground(DROIDIFY_PLAYER_SERVICE_NOTIFICATION_ID, notification);
     }
 
     private boolean requestAudioFocus() {

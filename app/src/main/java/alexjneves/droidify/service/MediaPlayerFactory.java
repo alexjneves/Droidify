@@ -28,6 +28,7 @@ final class MediaPlayerFactory {
             mediaPlayer.setDataSource(applicationContext, Uri.parse(resourcePath));
             mediaPlayer.prepare();
         } catch (final IOException ex) {
+            // TODO: Error handling callback
             throw new RuntimeException();
         }
 

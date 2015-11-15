@@ -7,7 +7,7 @@ import android.content.Intent;
 
 import alexjneves.droidify.TrackSelectionActivity;
 
-public final class DroidifyPlayerServiceNotificationFactory {
+final class DroidifyPlayerServiceNotificationFactory {
     private static final int REQUEST_CODE = 0;
 
     private final Context applicationContext;
