@@ -9,59 +9,47 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.support.annotation.Nullable;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener {
-    private final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
-    private final int DROIDIFY_PLAYER_SERVICE_NOTIFICATION_ID = 1;
-    public static final float MAX_VOLUME = 1.0f;
-    private final float MIN_VOLUME = 1.0f;
+public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener {
+    private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
+    private static final int DROIDIFY_PLAYER_SERVICE_NOTIFICATION_ID = 1;
+    private static final float MAX_VOLUME = 1.0f;
+    private static final float MIN_VOLUME = 1.0f;
 
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
     private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
-    private final MediaPlayer mediaPlayer;
 
-    private Uri currentTrack;
     private DroidifyPlayerServiceNotificationFactory droidifyPlayerServiceNotificationFactory;
     private AudioManager audioManager;
+    private PlaybackTrackQueue playbackTrackQueue;
     private DroidifyPlayerState droidifyPlayerState;
     private int previousAudioFocusState;
-    private boolean awaitingPlayback;
 
     public DroidifyPlayerService() {
         droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder();
         stateChangeListeners = new ArrayList<>();
-        mediaPlayer = new MediaPlayer();
 
-        currentTrack = null;
         droidifyPlayerServiceNotificationFactory = null;
         audioManager = null;
+        playbackTrackQueue = null;
         droidifyPlayerState = DroidifyPlayerState.STOPPED;
         previousAudioFocusState = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
-        awaitingPlayback = false;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnCompletionListener(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        resetMediaPlayer();
+        playbackTrackQueue.cleanUp();
     }
 
     @Nullable
@@ -72,20 +60,19 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
     @Override
     public void changeTrack(final String resourcePath) {
-        changeState(DroidifyPlayerState.PREPARING);
-        currentTrack = Uri.parse(resourcePath);
-
-        resetMediaPlayer();
-
-        try {
-            mediaPlayer.setDataSource(getApplicationContext(), currentTrack);
-        } catch (final IOException ex) {
-            changeState(DroidifyPlayerState.ERROR);
+        if (playbackTrackQueue == null) {
             return;
         }
 
         droidifyPlayerServiceNotificationFactory = new DroidifyPlayerServiceNotificationFactory(resourcePath, getApplicationContext());
-        mediaPlayer.prepareAsync();
+        playbackTrackQueue.changeTrack(resourcePath);
+        changeState(DroidifyPlayerState.PAUSED);
+    }
+
+    @Override
+    public void changePlaylist(final List<String> resourcePaths) {
+        playbackTrackQueue = new PlaybackTrackQueue(resourcePaths, getApplicationContext());
+        playbackTrackQueue.registerOnCompletionListener(this);
     }
 
     @Override
@@ -96,18 +83,16 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
                 return;
             }
 
-            mediaPlayer.start();
+            playbackTrackQueue.playCurrentTrack();
             pushNotification(droidifyPlayerServiceNotificationFactory.playingNotification());
             changeState(DroidifyPlayerState.PLAYING);
-        } else if (droidifyPlayerState == DroidifyPlayerState.PREPARING) {
-            awaitingPlayback = true;
         }
     }
 
     @Override
     public void pauseCurrentTrack() {
         if (droidifyPlayerState == DroidifyPlayerState.PLAYING) {
-            mediaPlayer.pause();
+            playbackTrackQueue.pauseCurrentTrack();
             pushNotification(droidifyPlayerServiceNotificationFactory.pausedNotification());
             changeState(DroidifyPlayerState.PAUSED);
         }
@@ -119,20 +104,9 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     }
 
     @Override
-    public void onPrepared(final MediaPlayer mediaPlayer) {
-        changeState(DroidifyPlayerState.PAUSED);
-
-        if (awaitingPlayback) {
-            awaitingPlayback = false;
-            playCurrentTrack();
-        }
-    }
-
-    @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         changeState(DroidifyPlayerState.STOPPED);
         this.stopForeground(true);
-        resetMediaPlayer();
         audioManager.abandonAudioFocus(this);
     }
 
@@ -140,7 +114,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     public void onAudioFocusChange(final int focusChange) {
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                mediaPlayer.setVolume(MAX_VOLUME, MAX_VOLUME);
+                playbackTrackQueue.setVolume(MAX_VOLUME);
 
                 if (previousAudioFocusState != AudioManager.AUDIOFOCUS_LOSS) {
                     playCurrentTrack();
@@ -151,7 +125,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
                 pauseCurrentTrack();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                mediaPlayer.setVolume(MIN_VOLUME, MIN_VOLUME);
+                playbackTrackQueue.setVolume(MIN_VOLUME);
                 break;
             default:
                 break;
@@ -176,11 +150,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         final int audioFocusRequestResult = audioManager.requestAudioFocus(this, STREAM_TYPE, AudioManager.AUDIOFOCUS_GAIN);
 
         return audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
-    }
-
-    private void resetMediaPlayer() {
-        mediaPlayer.stop();
-        mediaPlayer.reset();
     }
 
     final class DroidifyPlayerServiceBinder extends Binder implements IDroidifyPlayerServiceBinder {

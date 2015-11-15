@@ -8,10 +8,13 @@ import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import alexjneves.droidify.service.DroidifyPlayerService;
 import alexjneves.droidify.service.IDroidifyPlayer;
+
+// TODO: Handle Service Error State
 
 public final class TrackSelectionActivity extends AppCompatActivity implements IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener, IRunOnUiThread {
     private final TrackListViewAdapterFactory trackListViewAdapterFactory;
@@ -71,6 +74,14 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         this.trackListView = new TrackListView(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this);
 
+        final List<String> resourcePaths = new ArrayList<>();
+        for (final Track track : tracks) {
+            resourcePaths.add(track.getResourcePath());
+        }
+
+        droidifyPlayer.changePlaylist(resourcePaths);
+
+        // TODO: Fix
         this.trackListView.changeSelection(0);
         droidifyPlayer.changeTrack(tracks.get(0).getResourcePath());
     }
