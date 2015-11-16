@@ -10,4 +10,5 @@ public interface IDroidifyPlayer {
     void skipForward();
     void skipBackward();
     void registerStateChangeListener(final IDroidifyPlayerStateChangeListener droidifyPlayerStateChangeListener);
+    String getCurrentTrack();
 }

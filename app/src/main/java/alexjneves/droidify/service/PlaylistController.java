@@ -45,6 +45,10 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
         currentTrack.pause();
     }
 
+    public PlayableTrack getCurrentTrack() {
+        return currentTrack;
+    }
+
     public PlayableTrack getNextTrack() {
         int nextTrackIndex = currentTrackIndex + 1;
 

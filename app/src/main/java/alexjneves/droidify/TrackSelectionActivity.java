@@ -25,6 +25,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     private DroidifyPlayerServiceConnection droidifyPlayerServiceConnection;
     private TrackPlayPauseButton trackPlayPauseButton;
     private TrackListView trackListView;
+    private DroidifyPreferencesEditor droidifyPreferencesEditor;
 
     public TrackSelectionActivity() {
         trackListViewAdapterFactory = new TrackListViewAdapterFactory();
@@ -33,6 +34,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         droidifyPlayer = null;
         trackPlayPauseButton = null;
         trackListView = null;
+        droidifyPreferencesEditor = null;
     }
 
     @Override
@@ -41,9 +43,9 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         this.setContentView(R.layout.activity_track_selection);
 
         droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
+        droidifyPreferencesEditor = new DroidifyPreferencesEditor(getPreferences(MODE_PRIVATE));
 
         // TODO: Investigate different bind constants
-        // TODO: Make foreground service
         final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
         this.bindService(startDroidifyPlayerServiceIntent, droidifyPlayerServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -51,6 +53,9 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        final String lastPlayedTrack = droidifyPlayer.getCurrentTrack();
+        droidifyPreferencesEditor.writeLastPlayedTrack(lastPlayedTrack);
 
         if (droidifyPlayer != null) {
             this.unbindService(droidifyPlayerServiceConnection);
@@ -76,16 +81,25 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         this.trackListView = new TrackListView(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this);
 
+        final String lastPlayedTrack = droidifyPreferencesEditor.readLastPlayedTrack();
+        int currentSelection = 0;
+
         final List<String> resourcePaths = new ArrayList<>();
-        for (final Track track : tracks) {
-            resourcePaths.add(track.getResourcePath());
+        for (int i = 0; i < tracks.size(); ++i) {
+            final String resourcePath = tracks.get(i).getResourcePath();
+
+            resourcePaths.add(resourcePath);
+
+            if (resourcePath.equals(lastPlayedTrack)) {
+                currentSelection = i;
+            }
         }
 
         droidifyPlayer.changePlaylist(resourcePaths);
 
         // TODO: Fix
-        this.trackListView.changeSelection(0);
-        droidifyPlayer.changeTrack(tracks.get(0).getResourcePath());
+        this.trackListView.changeSelection(currentSelection);
+        droidifyPlayer.changeTrack(tracks.get(currentSelection).getResourcePath());
     }
 
     @Override
