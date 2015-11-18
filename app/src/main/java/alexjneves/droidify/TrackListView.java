@@ -7,9 +7,8 @@ import android.widget.ListView;
 import java.util.List;
 
 import alexjneves.droidify.service.IDroidifyPlayer;
-import alexjneves.droidify.service.ITrackChangedListener;
 
-public final class TrackListView implements ITrackChangedListener {
+public final class TrackListView {
     private final ListView trackListView;
     private final List<Track> tracks;
     private final ListAdapter listAdapter;
@@ -17,14 +16,7 @@ public final class TrackListView implements ITrackChangedListener {
     private final IRunOnUiThread runOnUiThread;
     private View currentSelectedItem;
 
-    public static TrackListView create(final ListView trackListViewUi, final List<Track> tracks, final ListAdapter listAdapter, final OnTrackClickListener onTrackClickListener, final IRunOnUiThread runOnUiThread, final IDroidifyPlayer droidifyPlayer) {
-        final TrackListView trackListView = new TrackListView(trackListViewUi, tracks, listAdapter, onTrackClickListener, runOnUiThread);
-        droidifyPlayer.registerTrackChangedListener(trackListView);
-
-        return trackListView;
-    }
-
-    private TrackListView(final ListView trackListView, final List<Track> tracks, final ListAdapter listAdapter, final OnTrackClickListener onTrackClickListener, final IRunOnUiThread runOnUiThread) {
+    public TrackListView(final ListView trackListView, final List<Track> tracks, final ListAdapter listAdapter, final OnTrackClickListener onTrackClickListener, final IRunOnUiThread runOnUiThread) {
         this.trackListView = trackListView;
         this.tracks = tracks;
         this.listAdapter = listAdapter;
@@ -34,11 +26,6 @@ public final class TrackListView implements ITrackChangedListener {
 
         trackListView.setAdapter(listAdapter);
         trackListView.setOnItemClickListener(onTrackClickListener);
-    }
-
-    @Override
-    public void onTrackChanged(final String resourcePath) {
-        changeSelection(resourcePath);
     }
 
     public void changeSelection(final String resourcePath) {

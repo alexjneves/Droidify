@@ -1,5 +1,5 @@
 package alexjneves.droidify.service;
 
-public interface ITrackChangedListener {
+interface ITrackChangedListener {
     void onTrackChanged(final String resourcePath);
 }

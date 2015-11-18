@@ -1,6 +1,5 @@
 package alexjneves.droidify;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,6 +27,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     private TrackShuffleButton trackShuffleButton;
     private TrackListView trackListView;
     private DroidifyPreferencesEditor droidifyPreferencesEditor;
+    private TrackChangedBroadcastReceiver trackChangedBroadcastReceiver;
 
     public TrackSelectionActivity() {
         trackListViewAdapterFactory = new TrackListViewAdapterFactory();
@@ -38,6 +38,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         trackShuffleButton = null;
         trackListView = null;
         droidifyPreferencesEditor = null;
+        trackChangedBroadcastReceiver = null;
     }
 
     @Override
@@ -66,6 +67,10 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         if (droidifyPlayer != null) {
             this.unbindService(droidifyPlayerServiceConnection);
         }
+
+        if (trackChangedBroadcastReceiver != null) {
+            trackChangedBroadcastReceiver.unregister();
+        }
     }
 
     @Override
@@ -82,11 +87,12 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     @Override
     public void onTrackListRetrieved(final List<Track> tracks) {
         final ListView trackListViewUi = (ListView) this.findViewById(R.id.trackList);
-        trackListViewUi.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         final ListAdapter trackListViewAdapter = trackListViewAdapterFactory.createAdapter(this, tracks);
         final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks, droidifyPlayer);
 
-        this.trackListView = TrackListView.create(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this, droidifyPlayer);
+        this.trackListView = new TrackListView(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this);
+
+        this.trackChangedBroadcastReceiver = new TrackChangedBroadcastReceiver(this, trackListView);
 
         final String lastPlayedTrack = droidifyPreferencesEditor.readLastPlayedTrack();
         int currentSelection = 0;

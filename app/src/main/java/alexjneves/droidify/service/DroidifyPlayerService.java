@@ -8,9 +8,13 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import alexjneves.droidify.DroidifyConstants;
+import alexjneves.droidify.TrackChangedBroadcastReceiver;
 
 public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener, ITrackChangedListener {
     private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -19,7 +23,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
     private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
-    private final List<ITrackChangedListener> trackChangedListeners;
 
     private AudioManager audioManager;
     private PlaylistController playlistController;
@@ -31,7 +34,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     public DroidifyPlayerService() {
         droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder();
         stateChangeListeners = new ArrayList<>();
-        trackChangedListeners = new ArrayList<>();
 
         audioManager = null;
         playlistController = null;
@@ -131,11 +133,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     }
 
     @Override
-    public void registerTrackChangedListener(final ITrackChangedListener trackChangedListener) {
-        trackChangedListeners.add(trackChangedListener);
-    }
-
-    @Override
     public String getCurrentTrack() {
         return playlistController.getCurrentTrack().getResourcePath();
     }
@@ -192,9 +189,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
     @Override
     public void onTrackChanged(final String resourcePath) {
-        for (final ITrackChangedListener trackChangedListener : trackChangedListeners) {
-            trackChangedListener.onTrackChanged(resourcePath);
-        }
+        TrackChangedBroadcastReceiver.sendBroadcast(this, resourcePath);
     }
 
     final class DroidifyPlayerServiceBinder extends Binder implements IDroidifyPlayerServiceBinder {
