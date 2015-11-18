@@ -8,12 +8,10 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import alexjneves.droidify.DroidifyConstants;
 import alexjneves.droidify.TrackChangedBroadcastReceiver;
 
 public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener, ITrackChangedListener {

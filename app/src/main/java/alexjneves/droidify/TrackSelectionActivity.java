@@ -17,7 +17,7 @@ import alexjneves.droidify.service.IDroidifyPlayer;
 
 // TODO: Handle Service Error State
 
-public final class TrackSelectionActivity extends AppCompatActivity implements IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener, IRunOnUiThread {
+public final class TrackSelectionActivity extends AppCompatActivity implements IRunOnUiThread, IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener {
     private final TrackListViewAdapterFactory trackListViewAdapterFactory;
 
     private String musicDirectory;
@@ -74,6 +74,11 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     }
 
     @Override
+    public void executeOnUiThread(final Runnable toRun) {
+        this.runOnUiThread(toRun);
+    }
+
+    @Override
     public void onDroidifyPlayerRetrieved(final IDroidifyPlayer droidifyPlayer) {
         this.droidifyPlayer = droidifyPlayer;
 
@@ -86,40 +91,59 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
     @Override
     public void onTrackListRetrieved(final List<Track> tracks) {
+        trackListView = createTrackListView(tracks);
+        trackChangedBroadcastReceiver = new TrackChangedBroadcastReceiver(this, trackListView);
+
+        final List<String> resourcePaths = getTrackResourceIds(tracks);
+        droidifyPlayer.changePlaylist(resourcePaths);
+
+        trackShuffleButton = createTrackShuffleButton();
+
+        trySetPreviouslyPlayedTrack(resourcePaths);
+    }
+
+    private TrackListView createTrackListView(final List<Track> tracks) {
         final ListView trackListViewUi = (ListView) this.findViewById(R.id.trackList);
         final ListAdapter trackListViewAdapter = trackListViewAdapterFactory.createAdapter(this, tracks);
         final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks, droidifyPlayer);
 
-        this.trackListView = new TrackListView(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this);
+        return new TrackListView(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this);
+    }
 
-        this.trackChangedBroadcastReceiver = new TrackChangedBroadcastReceiver(this, trackListView);
+    private TrackShuffleButton createTrackShuffleButton() {
+        final Button shuffleButton = (Button) this.findViewById(R.id.shuffleButton);
+        final boolean shuffleOn = droidifyPreferencesEditor.readShuffleOn();
 
-        final String lastPlayedTrack = droidifyPreferencesEditor.readLastPlayedTrack();
-        int currentSelection = 0;
+        return TrackShuffleButton.create(shuffleButton, droidifyPlayer, shuffleOn);
+    }
 
+    private List<String> getTrackResourceIds(final List<Track> tracks) {
         final List<String> resourcePaths = new ArrayList<>();
+
         for (int i = 0; i < tracks.size(); ++i) {
             final String resourcePath = tracks.get(i).getResourcePath();
 
             resourcePaths.add(resourcePath);
+        }
 
+        return resourcePaths;
+    }
+
+    private void trySetPreviouslyPlayedTrack(final List<String> resourcePaths) {
+        final String lastPlayedTrack = droidifyPreferencesEditor.readLastPlayedTrack();
+
+        boolean exists = false;
+
+        for (final String resourcePath : resourcePaths) {
             if (resourcePath.equals(lastPlayedTrack)) {
-                currentSelection = i;
+                exists = true;
+                break;
             }
         }
 
-        droidifyPlayer.changePlaylist(resourcePaths);
-
-        final Button shuffleButton = (Button) this.findViewById(R.id.shuffleButton);
-        final boolean shuffleOn = droidifyPreferencesEditor.readShuffleOn();
-        this.trackShuffleButton = TrackShuffleButton.create(shuffleButton, droidifyPlayer, shuffleOn);
-
-        this.droidifyPlayer.changeTrack(tracks.get(currentSelection).getResourcePath());
-    }
-
-    @Override
-    public void executeOnUiThread(final Runnable toRun) {
-        this.runOnUiThread(toRun);
+        if (exists) {
+            droidifyPlayer.changeTrack(lastPlayedTrack);
+        }
     }
 
     public void onBackwardButtonClick(final View view) {

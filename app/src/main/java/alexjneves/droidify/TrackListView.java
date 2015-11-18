@@ -6,8 +6,6 @@ import android.widget.ListView;
 
 import java.util.List;
 
-import alexjneves.droidify.service.IDroidifyPlayer;
-
 public final class TrackListView {
     private final ListView trackListView;
     private final List<Track> tracks;
@@ -61,7 +59,7 @@ public final class TrackListView {
     }
 
     // http://stackoverflow.com/questions/24811536/android-listview-get-item-view-by-position
-    public View getChildView(final int position, final ListView listView) {
+    private View getChildView(final int position, final ListView listView) {
         final int firstListItemPosition = listView.getFirstVisiblePosition();
         final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
 

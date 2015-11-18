@@ -99,9 +99,8 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
     }
 
     public void cleanUp() {
-        // TODO: Do on list instead
-        for (final Map.Entry<String, PlayableTrack> playableTrackEntry : playableTrackMap.entrySet()) {
-            playableTrackEntry.getValue().stop();
+        for (final PlayableTrack playableTrack : playableTracks) {
+            playableTrack.stop();
         }
     }
 
