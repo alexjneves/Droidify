@@ -147,7 +147,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     public void onTrackComplete() {
         changeState(DroidifyPlayerState.STOPPED);
         this.stopForeground(true);
-        audioFocusHandler.abandonAudioFocus(this);
+        audioFocusHandler.abandonAudioFocus();
 
         if (autoPlay) {
             final PlayableTrack nextTrack = playlistController.getNextTrack();
