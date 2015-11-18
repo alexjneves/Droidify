@@ -18,11 +18,12 @@ final class MediaPlayerFactory {
         this.resourcePath = resourcePath;
     }
 
-    public MediaPlayer createPreparedPlayer() {
+    public MediaPlayer createPreparedPlayer(final MediaPlayer.OnCompletionListener onCompletionListener) {
         final MediaPlayer mediaPlayer = new MediaPlayer();
 
         mediaPlayer.setAudioStreamType(STREAM_TYPE);
         mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK);
+        mediaPlayer.setOnCompletionListener(onCompletionListener);
 
         try {
             mediaPlayer.setDataSource(applicationContext, Uri.parse(resourcePath));

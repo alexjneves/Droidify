@@ -1,7 +1,6 @@
 package alexjneves.droidify.service;
 
 import android.content.Context;
-import android.media.MediaPlayer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,15 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-final class PlaylistController implements MediaPlayer.OnCompletionListener {
+final class PlaylistController implements ITrackCompleteListener {
     private final Context applicationContext;
     private final ITrackChangedListener trackChangedListener;
     private final Map<String, PlayableTrack> playableTrackMap;
     private final List<PlayableTrack> playableTracks;
-    private final List<ITrackChangedListener> trackChangedListeners;
 
     private List<PlayableTrack> playQueue;
-    private List<MediaPlayer.OnCompletionListener> onCompletionListeners;
+    private List<ITrackCompleteListener> trackCompleteListeners;
     private PlayableTrack currentTrack;
     private int currentTrackIndex;
 
@@ -26,10 +24,9 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
         this.trackChangedListener = trackChangedListener;
         this.playableTrackMap = new HashMap<>();
         this.playableTracks = createPlayableTracks(resourcePaths);
-        this.trackChangedListeners = new ArrayList<>();
 
         this.playQueue = new ArrayList<>(playableTracks);
-        this.onCompletionListeners = new ArrayList<>();
+        this.trackCompleteListeners = new ArrayList<>();
         this.currentTrack = null;
         this.currentTrackIndex = 0;
     }
@@ -37,13 +34,10 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
     public void changeTrack(final String resourcePath) {
         if (currentTrack != null) {
             currentTrack.stop();
-            currentTrack.unregisterOnCompletionListener(this);
         }
 
         currentTrack = playableTrackMap.get(resourcePath);
         currentTrackIndex = playQueue.indexOf(currentTrack);
-
-        currentTrack.registerOnCompletionListener(this);
 
         trackChangedListener.onTrackChanged(resourcePath);
     }
@@ -94,8 +88,8 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
         currentTrackIndex = playQueue.indexOf(currentTrack);
     }
 
-    public void registerOnCompletionListener(final MediaPlayer.OnCompletionListener onCompletionListener) {
-        onCompletionListeners.add(onCompletionListener);
+    public void registerTrackCompleteListener(final ITrackCompleteListener trackCompleteListener) {
+        trackCompleteListeners.add(trackCompleteListener);
     }
 
     public void cleanUp() {
@@ -105,11 +99,9 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
     }
 
     @Override
-    public void onCompletion(final MediaPlayer mediaPlayer) {
-        // TODO: Play next track
-
-        for (final MediaPlayer.OnCompletionListener onCompletionListener : onCompletionListeners) {
-            onCompletionListener.onCompletion(mediaPlayer);
+    public void onTrackComplete() {
+        for (final ITrackCompleteListener trackCompletionListener : trackCompleteListeners) {
+            trackCompletionListener.onTrackComplete();
         }
     }
 
@@ -118,7 +110,7 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
 
         for (final String resourcePath : resourcePaths) {
             final PlayableTrack playableTrack = new PlayableTrack(resourcePath, this.applicationContext);
-            playableTrack.registerOnCompletionListener(this);
+            playableTrack.registerTrackCompleteListener(this);
 
             playableTracks.add(playableTrack);
             playableTrackMap.put(resourcePath, playableTrack);

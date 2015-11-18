@@ -8,13 +8,13 @@ import java.util.List;
 
 final class PlayableTrack implements MediaPlayer.OnCompletionListener {
     private final String resourcePath;
-    private final List<MediaPlayer.OnCompletionListener> onCompletionListeners;
+    private final List<ITrackCompleteListener> trackCompleteListeners;
     private MediaPlayerFactory mediaPlayerFactory;
     private MediaPlayer mediaPlayer;
 
     public PlayableTrack(final String resourcePath, final Context applicationContext) {
         this.resourcePath = resourcePath;
-        this.onCompletionListeners = new ArrayList<>();
+        this.trackCompleteListeners = new ArrayList<>();
         this.mediaPlayerFactory = new MediaPlayerFactory(applicationContext, resourcePath);
         this.mediaPlayer = null;
     }
@@ -25,7 +25,7 @@ final class PlayableTrack implements MediaPlayer.OnCompletionListener {
 
     public void play() {
         if (mediaPlayer == null) {
-            mediaPlayer = mediaPlayerFactory.createPreparedPlayer();
+            mediaPlayer = mediaPlayerFactory.createPreparedPlayer(this);
         }
 
         mediaPlayer.start();
@@ -62,20 +62,16 @@ final class PlayableTrack implements MediaPlayer.OnCompletionListener {
         mediaPlayer.setVolume(volume, volume);
     }
 
-    public void registerOnCompletionListener(final MediaPlayer.OnCompletionListener onCompletionListener) {
-        onCompletionListeners.add(onCompletionListener);
-    }
-
-    public void unregisterOnCompletionListener(final MediaPlayer.OnCompletionListener onCompletionListener) {
-        onCompletionListeners.remove(onCompletionListener);
+    public void registerTrackCompleteListener(final ITrackCompleteListener trackCompleteListener) {
+        trackCompleteListeners.add(trackCompleteListener);
     }
 
     @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         stop();
 
-        for (final MediaPlayer.OnCompletionListener onCompletionListener : onCompletionListeners) {
-            onCompletionListener.onCompletion(mediaPlayer);
+        for (final ITrackCompleteListener trackCompleteListener : trackCompleteListeners) {
+            trackCompleteListener.onTrackComplete();
         }
     }
 }

@@ -1,10 +1,7 @@
 package alexjneves.droidify.service;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -14,37 +11,33 @@ import java.util.List;
 
 import alexjneves.droidify.TrackChangedBroadcastReceiver;
 
-public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener, ITrackChangedListener {
-    private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
-    private static final float MAX_VOLUME = 1.0f;
-    private static final float MIN_VOLUME = 1.0f;
-
+public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, ITrackCompleteListener, ITrackChangedListener {
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
     private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
 
-    private AudioManager audioManager;
+    private AudioFocusHandler audioFocusHandler;
     private PlaylistController playlistController;
     private DroidifyPlayerServiceNotifier droidifyPlayerServiceNotifier;
     private DroidifyPlayerState droidifyPlayerState;
-    private int previousAudioFocusState;
     private boolean shuffle;
+    private boolean autoPlay;
 
     public DroidifyPlayerService() {
         droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder();
         stateChangeListeners = new ArrayList<>();
 
-        audioManager = null;
+        audioFocusHandler = null;
         playlistController = null;
         droidifyPlayerServiceNotifier = null;
         droidifyPlayerState = DroidifyPlayerState.STOPPED;
-        previousAudioFocusState = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         shuffle = false;
+        autoPlay = true;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioFocusHandler = new AudioFocusHandler(this, this);
     }
 
     @Override
@@ -72,7 +65,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     @Override
     public void changePlaylist(final List<String> resourcePaths) {
         playlistController = new PlaylistController(resourcePaths, getApplicationContext(), this);
-        playlistController.registerOnCompletionListener(this);
+        playlistController.registerTrackCompleteListener(this);
 
         if (shuffle) {
             playlistController.shufflePlaylist();
@@ -82,7 +75,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     @Override
     public void playCurrentTrack() {
         if (droidifyPlayerState == DroidifyPlayerState.PAUSED) {
-            if (!requestAudioFocus()) {
+            if (!audioFocusHandler.requestAudioFocus()) {
                 changeState(DroidifyPlayerState.ERROR);
                 return;
             }
@@ -126,6 +119,16 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     }
 
     @Override
+    public void toggleAutoPlay(final boolean on) {
+        autoPlay = on;
+    }
+
+    @Override
+    public void setVolume(final float volume) {
+        playlistController.setVolume(volume);
+    }
+
+    @Override
     public void registerStateChangeListener(final IDroidifyPlayerStateChangeListener droidifyPlayerStateChangeListener) {
         stateChangeListeners.add(droidifyPlayerStateChangeListener);
     }
@@ -141,34 +144,16 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     }
 
     @Override
-    public void onCompletion(final MediaPlayer mediaPlayer) {
+    public void onTrackComplete() {
         changeState(DroidifyPlayerState.STOPPED);
         this.stopForeground(true);
-        audioManager.abandonAudioFocus(this);
-    }
+        audioFocusHandler.abandonAudioFocus(this);
 
-    @Override
-    public void onAudioFocusChange(final int focusChange) {
-        switch (focusChange) {
-            case AudioManager.AUDIOFOCUS_GAIN:
-                playlistController.setVolume(MAX_VOLUME);
-
-                if (previousAudioFocusState != AudioManager.AUDIOFOCUS_LOSS) {
-                    playCurrentTrack();
-                }
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS:
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                pauseCurrentTrack();
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                playlistController.setVolume(MIN_VOLUME);
-                break;
-            default:
-                break;
+        if (autoPlay) {
+            final PlayableTrack nextTrack = playlistController.getNextTrack();
+            changeTrack(nextTrack.getResourcePath());
+            playCurrentTrack();
         }
-
-        previousAudioFocusState = focusChange;
     }
 
     private void changeState(final DroidifyPlayerState newState) {
@@ -177,12 +162,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         for (final IDroidifyPlayerStateChangeListener stateChangeListener : stateChangeListeners) {
             stateChangeListener.onDroidifyPlayerStateChange(droidifyPlayerState);
         }
-    }
-
-    private boolean requestAudioFocus() {
-        final int audioFocusRequestResult = audioManager.requestAudioFocus(this, STREAM_TYPE, AudioManager.AUDIOFOCUS_GAIN);
-
-        return audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
     @Override
