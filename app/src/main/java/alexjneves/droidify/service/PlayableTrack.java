@@ -11,14 +11,12 @@ final class PlayableTrack implements MediaPlayer.OnCompletionListener {
     private final List<MediaPlayer.OnCompletionListener> onCompletionListeners;
     private MediaPlayerFactory mediaPlayerFactory;
     private MediaPlayer mediaPlayer;
-    private boolean initialized;
 
     public PlayableTrack(final String resourcePath, final Context applicationContext) {
         this.resourcePath = resourcePath;
         this.onCompletionListeners = new ArrayList<>();
         this.mediaPlayerFactory = new MediaPlayerFactory(applicationContext, resourcePath);
         this.mediaPlayer = new MediaPlayer();
-        this.initialized = false;
     }
 
     public String getResourcePath() {
@@ -26,15 +24,18 @@ final class PlayableTrack implements MediaPlayer.OnCompletionListener {
     }
 
     public void play() {
-        if (!initialized) {
+        if (mediaPlayer == null) {
             mediaPlayer = mediaPlayerFactory.createPreparedPlayer();
-            initialized = true;
         }
 
         mediaPlayer.start();
     }
 
     public void pause() {
+        if (mediaPlayer == null) {
+            return;
+        }
+
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
         }
@@ -43,7 +44,7 @@ final class PlayableTrack implements MediaPlayer.OnCompletionListener {
     public void stop() {
         mediaPlayer.stop();
         mediaPlayer.reset();
-        initialized = false;
+        mediaPlayer = null;
     }
 
     public void setVolume(final float volume) {
@@ -57,7 +58,6 @@ final class PlayableTrack implements MediaPlayer.OnCompletionListener {
     @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         stop();
-        initialized = false;
 
         for (final MediaPlayer.OnCompletionListener onCompletionListener : onCompletionListeners) {
             onCompletionListener.onCompletion(mediaPlayer);

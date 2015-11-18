@@ -83,6 +83,15 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
         }
     }
 
+    @Override
+    public void onCompletion(final MediaPlayer mediaPlayer) {
+        // TODO: Play next track
+
+        for (final MediaPlayer.OnCompletionListener onCompletionListener : onCompletionListeners) {
+            onCompletionListener.onCompletion(mediaPlayer);
+        }
+    }
+
     private List<PlayableTrack> createPlayableTracks(final List<String> resourcePaths) {
         final List<PlayableTrack> playableTracks = new ArrayList<>();
 
@@ -95,32 +104,5 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
         }
 
         return playableTracks;
-    }
-
-//    private void linkTracks(final List<PlayableTrack> playableTracks) {
-//        if (playableTracks.isEmpty()) {
-//            return;
-//        }
-//
-//        final MediaPlayer firstMediaPlayer = playableTracks.get(0).getMediaPlayer();
-//        MediaPlayer previousMediaPlayer = firstMediaPlayer;
-//
-//        for (int i = 1; i < playableTracks.size(); ++i) {
-//            final MediaPlayer nextMediaPlayer = playableTracks.get(i).getMediaPlayer();
-//
-//            previousMediaPlayer.setNextMediaPlayer(nextMediaPlayer);
-//            previousMediaPlayer = nextMediaPlayer;
-//        }
-//
-//        previousMediaPlayer.setNextMediaPlayer(firstMediaPlayer);
-//    }
-
-    @Override
-    public void onCompletion(final MediaPlayer mediaPlayer) {
-        // TODO: Play next track
-
-        for (final MediaPlayer.OnCompletionListener onCompletionListener : onCompletionListeners) {
-            onCompletionListener.onCompletion(mediaPlayer);
-        }
     }
 }

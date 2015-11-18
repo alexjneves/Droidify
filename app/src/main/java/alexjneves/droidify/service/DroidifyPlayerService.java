@@ -57,10 +57,6 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
     @Override
     public void changeTrack(final String resourcePath) {
-        if (playlistController == null) {
-            return;
-        }
-
         final DroidifyPlayerServiceNotificationFactory droidifyPlayerServiceNotificationFactory = new DroidifyPlayerServiceNotificationFactory(resourcePath, getApplicationContext());
 
         droidifyPlayerServiceNotifier = new DroidifyPlayerServiceNotifier(droidifyPlayerServiceNotificationFactory, this);
