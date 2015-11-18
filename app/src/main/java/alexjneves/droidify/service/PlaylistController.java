@@ -11,18 +11,23 @@ import java.util.Map;
 
 final class PlaylistController implements MediaPlayer.OnCompletionListener {
     private final Context applicationContext;
+    private final ITrackChangedListener trackChangedListener;
     private final Map<String, PlayableTrack> playableTrackMap;
     private final List<PlayableTrack> playableTracks;
+    private final List<ITrackChangedListener> trackChangedListeners;
 
     private List<PlayableTrack> playQueue;
     private List<MediaPlayer.OnCompletionListener> onCompletionListeners;
     private PlayableTrack currentTrack;
     private int currentTrackIndex;
 
-    public PlaylistController(final List<String> resourcePaths, final Context applicationContext) {
+    public PlaylistController(final List<String> resourcePaths, final Context applicationContext, final ITrackChangedListener trackChangedListener) {
         this.applicationContext = applicationContext;
+        this.trackChangedListener = trackChangedListener;
         this.playableTrackMap = new HashMap<>();
         this.playableTracks = createPlayableTracks(resourcePaths);
+        this.trackChangedListeners = new ArrayList<>();
+
         this.playQueue = new ArrayList<>(playableTracks);
         this.onCompletionListeners = new ArrayList<>();
         this.currentTrack = null;
@@ -35,11 +40,12 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
             currentTrack.unregisterOnCompletionListener(this);
         }
 
-
         currentTrack = playableTrackMap.get(resourcePath);
         currentTrackIndex = playQueue.indexOf(currentTrack);
 
         currentTrack.registerOnCompletionListener(this);
+
+        trackChangedListener.onTrackChanged(resourcePath);
     }
 
     public void playCurrentTrack() {

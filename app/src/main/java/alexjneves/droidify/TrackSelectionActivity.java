@@ -1,5 +1,6 @@
 package alexjneves.droidify;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -81,10 +82,11 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     @Override
     public void onTrackListRetrieved(final List<Track> tracks) {
         final ListView trackListViewUi = (ListView) this.findViewById(R.id.trackList);
+        trackListViewUi.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         final ListAdapter trackListViewAdapter = trackListViewAdapterFactory.createAdapter(this, tracks);
         final OnTrackClickListener onTrackClickListener = new OnTrackClickListener(tracks, droidifyPlayer);
 
-        this.trackListView = new TrackListView(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this);
+        this.trackListView = TrackListView.create(trackListViewUi, tracks, trackListViewAdapter, onTrackClickListener, this, droidifyPlayer);
 
         final String lastPlayedTrack = droidifyPreferencesEditor.readLastPlayedTrack();
         int currentSelection = 0;
@@ -106,9 +108,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         final boolean shuffleOn = droidifyPreferencesEditor.readShuffleOn();
         this.trackShuffleButton = TrackShuffleButton.create(shuffleButton, droidifyPlayer, shuffleOn);
 
-        // TODO: Fix
-        this.trackListView.changeSelection(currentSelection);
-        droidifyPlayer.changeTrack(tracks.get(currentSelection).getResourcePath());
+        this.droidifyPlayer.changeTrack(tracks.get(currentSelection).getResourcePath());
     }
 
     @Override

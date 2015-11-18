@@ -12,13 +12,14 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener {
+public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener, ITrackChangedListener {
     private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
     private static final float MAX_VOLUME = 1.0f;
     private static final float MIN_VOLUME = 1.0f;
 
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
     private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
+    private final List<ITrackChangedListener> trackChangedListeners;
 
     private AudioManager audioManager;
     private PlaylistController playlistController;
@@ -30,6 +31,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     public DroidifyPlayerService() {
         droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder();
         stateChangeListeners = new ArrayList<>();
+        trackChangedListeners = new ArrayList<>();
 
         audioManager = null;
         playlistController = null;
@@ -63,13 +65,13 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
 
         droidifyPlayerServiceNotifier = new DroidifyPlayerServiceNotifier(droidifyPlayerServiceNotificationFactory, this);
 
-        playlistController.changeTrack(resourcePath);
         changeState(DroidifyPlayerState.PAUSED);
+        playlistController.changeTrack(resourcePath);
     }
 
     @Override
     public void changePlaylist(final List<String> resourcePaths) {
-        playlistController = new PlaylistController(resourcePaths, getApplicationContext());
+        playlistController = new PlaylistController(resourcePaths, getApplicationContext(), this);
         playlistController.registerOnCompletionListener(this);
 
         if (shuffle) {
@@ -129,6 +131,11 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     }
 
     @Override
+    public void registerTrackChangedListener(final ITrackChangedListener trackChangedListener) {
+        trackChangedListeners.add(trackChangedListener);
+    }
+
+    @Override
     public String getCurrentTrack() {
         return playlistController.getCurrentTrack().getResourcePath();
     }
@@ -181,6 +188,13 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         final int audioFocusRequestResult = audioManager.requestAudioFocus(this, STREAM_TYPE, AudioManager.AUDIOFOCUS_GAIN);
 
         return audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    @Override
+    public void onTrackChanged(final String resourcePath) {
+        for (final ITrackChangedListener trackChangedListener : trackChangedListeners) {
+            trackChangedListener.onTrackChanged(resourcePath);
+        }
     }
 
     final class DroidifyPlayerServiceBinder extends Binder implements IDroidifyPlayerServiceBinder {
