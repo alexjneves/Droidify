@@ -27,8 +27,23 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1" >
+
+            <Button
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:id="@+id/shuffleButton"
+                android:background="@drawable/shuffle_button_off"
+                android:layout_marginBottom="2dp"
+                android:layout_marginTop="2dp"
+                android:onClick="onShuffleButtonClick" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="right">
+            >
 
             <Button
                 android:layout_width="20dp"
@@ -45,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
-            android:gravity="center">
+            >
 
         <Button
             android:layout_width="20dp"
@@ -61,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
-            android:gravity="left">
+            >
         <Button
             android:layout_width="20dp"
             android:layout_height="20dp"

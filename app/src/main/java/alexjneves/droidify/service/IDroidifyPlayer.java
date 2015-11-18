@@ -9,6 +9,7 @@ public interface IDroidifyPlayer {
     void pauseCurrentTrack();
     void skipForward();
     void skipBackward();
+    void toggleShuffle(final boolean on);
     void registerStateChangeListener(final IDroidifyPlayerStateChangeListener droidifyPlayerStateChangeListener);
     String getCurrentTrack();
 }

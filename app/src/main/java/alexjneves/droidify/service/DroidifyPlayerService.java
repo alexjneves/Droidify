@@ -25,6 +25,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     private DroidifyPlayerServiceNotifier droidifyPlayerServiceNotifier;
     private DroidifyPlayerState droidifyPlayerState;
     private int previousAudioFocusState;
+    private boolean shuffle;
 
     public DroidifyPlayerService() {
         droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder();
@@ -35,6 +36,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         droidifyPlayerServiceNotifier = null;
         droidifyPlayerState = DroidifyPlayerState.STOPPED;
         previousAudioFocusState = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        shuffle = false;
     }
 
     @Override
@@ -69,6 +71,10 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     public void changePlaylist(final List<String> resourcePaths) {
         playlistController = new PlaylistController(resourcePaths, getApplicationContext());
         playlistController.registerOnCompletionListener(this);
+
+        if (shuffle) {
+            playlistController.shufflePlaylist();
+        }
     }
 
     @Override
@@ -104,6 +110,17 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
         final PlayableTrack previousTrack = playlistController.getPreviousTrack();
         changeTrack(previousTrack.getResourcePath());
         playCurrentTrack();
+    }
+
+    @Override
+    public void toggleShuffle(final boolean on) {
+        shuffle = on;
+
+        if (shuffle) {
+            playlistController.shufflePlaylist();
+        } else {
+            playlistController.resetShuffle();
+        }
     }
 
     @Override

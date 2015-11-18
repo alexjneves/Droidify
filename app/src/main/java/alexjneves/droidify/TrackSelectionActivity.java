@@ -26,6 +26,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     private TrackPlayPauseButton trackPlayPauseButton;
     private TrackListView trackListView;
     private DroidifyPreferencesEditor droidifyPreferencesEditor;
+    private boolean shuffle;
 
     public TrackSelectionActivity() {
         trackListViewAdapterFactory = new TrackListViewAdapterFactory();
@@ -35,6 +36,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         trackPlayPauseButton = null;
         trackListView = null;
         droidifyPreferencesEditor = null;
+        shuffle = false;
     }
 
     @Override
@@ -44,6 +46,8 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
         droidifyPreferencesEditor = new DroidifyPreferencesEditor(getPreferences(MODE_PRIVATE));
+
+        shuffle = droidifyPreferencesEditor.readShuffleOn();
 
         // TODO: Investigate different bind constants
         final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
@@ -56,6 +60,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         final String lastPlayedTrack = droidifyPlayer.getCurrentTrack();
         droidifyPreferencesEditor.writeLastPlayedTrack(lastPlayedTrack);
+        droidifyPreferencesEditor.writeShuffleOn(shuffle);
 
         if (droidifyPlayer != null) {
             this.unbindService(droidifyPlayerServiceConnection);
@@ -97,6 +102,8 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         droidifyPlayer.changePlaylist(resourcePaths);
 
+        toggleShuffle();
+
         // TODO: Fix
         this.trackListView.changeSelection(currentSelection);
         droidifyPlayer.changeTrack(tracks.get(currentSelection).getResourcePath());
@@ -113,5 +120,22 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
     public void onForwardButtonClick(final View view) {
         droidifyPlayer.skipForward();
+    }
+
+    public void onShuffleButtonClick(final View view) {
+        shuffle = !shuffle;
+        toggleShuffle();
+    }
+
+    private void toggleShuffle() {
+        final Button shuffleButton = (Button) this.findViewById(R.id.shuffleButton);
+
+        droidifyPlayer.toggleShuffle(shuffle);
+
+        if (shuffle) {
+            shuffleButton.setBackgroundResource(R.drawable.shuffle_button_on);
+        } else {
+            shuffleButton.setBackgroundResource(R.drawable.shuffle_button_off);
+        }
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
     private final Map<String, PlayableTrack> playableTrackMap;
     private final List<PlayableTrack> playableTracks;
 
+    private List<PlayableTrack> playQueue;
     private List<MediaPlayer.OnCompletionListener> onCompletionListeners;
     private PlayableTrack currentTrack;
     private int currentTrackIndex;
@@ -21,6 +23,7 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
         this.applicationContext = applicationContext;
         this.playableTrackMap = new HashMap<>();
         this.playableTracks = createPlayableTracks(resourcePaths);
+        this.playQueue = new ArrayList<>(playableTracks);
         this.onCompletionListeners = new ArrayList<>();
         this.currentTrack = null;
         this.currentTrackIndex = 0;
@@ -29,15 +32,17 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
     public void changeTrack(final String resourcePath) {
         if (currentTrack != null) {
             currentTrack.stop();
+            currentTrack.unregisterOnCompletionListener(this);
         }
 
+
         currentTrack = playableTrackMap.get(resourcePath);
-        currentTrackIndex = playableTracks.indexOf(currentTrack);
+        currentTrackIndex = playQueue.indexOf(currentTrack);
+
+        currentTrack.registerOnCompletionListener(this);
     }
 
     public void playCurrentTrack() {
-        currentTrack.registerOnCompletionListener(this);
-
         currentTrack.play();
     }
 
@@ -52,25 +57,35 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
     public PlayableTrack getNextTrack() {
         int nextTrackIndex = currentTrackIndex + 1;
 
-        if (nextTrackIndex == playableTracks.size()) {
+        if (nextTrackIndex == playQueue.size()) {
             nextTrackIndex = 0;
         }
 
-        return playableTracks.get(nextTrackIndex);
+        return playQueue.get(nextTrackIndex);
     }
 
     public PlayableTrack getPreviousTrack() {
         int previousTrackIndex = currentTrackIndex - 1;
 
         if (previousTrackIndex < 0) {
-            previousTrackIndex = playableTracks.size() - 1;
+            previousTrackIndex = playQueue.size() - 1;
         }
 
-        return playableTracks.get(previousTrackIndex);
+        return playQueue.get(previousTrackIndex);
     }
 
     public void setVolume(final float volume) {
         currentTrack.setVolume(volume);
+    }
+
+    public void shufflePlaylist() {
+        Collections.shuffle(playQueue);
+        currentTrackIndex = playQueue.indexOf(currentTrack);
+    }
+
+    public void resetShuffle() {
+        playQueue = new ArrayList<>(playableTracks);
+        currentTrackIndex = playQueue.indexOf(currentTrack);
     }
 
     public void registerOnCompletionListener(final MediaPlayer.OnCompletionListener onCompletionListener) {
@@ -78,6 +93,7 @@ final class PlaylistController implements MediaPlayer.OnCompletionListener {
     }
 
     public void cleanUp() {
+        // TODO: Do on list instead
         for (final Map.Entry<String, PlayableTrack> playableTrackEntry : playableTrackMap.entrySet()) {
             playableTrackEntry.getValue().stop();
         }
