@@ -15,7 +15,7 @@ public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeLis
     private DroidifyPlayerState currentState;
     private boolean awaitingStateUpdate;
 
-    static TrackPlayPauseButton Create(final IDroidifyPlayer droidifyPlayer, final Button uiButton, final IRunOnUiThread runOnUiThread) {
+    static TrackPlayPauseButton create(final IDroidifyPlayer droidifyPlayer, final Button uiButton, final IRunOnUiThread runOnUiThread) {
         final TrackPlayPauseButton trackPlayPauseButton = new TrackPlayPauseButton(droidifyPlayer, uiButton, runOnUiThread);
 
         droidifyPlayer.registerStateChangeListener(trackPlayPauseButton);

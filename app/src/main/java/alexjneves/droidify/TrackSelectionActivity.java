@@ -24,9 +24,9 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     private IDroidifyPlayer droidifyPlayer;
     private DroidifyPlayerServiceConnection droidifyPlayerServiceConnection;
     private TrackPlayPauseButton trackPlayPauseButton;
+    private TrackShuffleButton trackShuffleButton;
     private TrackListView trackListView;
     private DroidifyPreferencesEditor droidifyPreferencesEditor;
-    private boolean shuffle;
 
     public TrackSelectionActivity() {
         trackListViewAdapterFactory = new TrackListViewAdapterFactory();
@@ -34,9 +34,9 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         musicDirectory = null;
         droidifyPlayer = null;
         trackPlayPauseButton = null;
+        trackShuffleButton = null;
         trackListView = null;
         droidifyPreferencesEditor = null;
-        shuffle = false;
     }
 
     @Override
@@ -46,8 +46,6 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
         droidifyPreferencesEditor = new DroidifyPreferencesEditor(getPreferences(MODE_PRIVATE));
-
-        shuffle = droidifyPreferencesEditor.readShuffleOn();
 
         // TODO: Investigate different bind constants
         final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
@@ -60,7 +58,9 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         final String lastPlayedTrack = droidifyPlayer.getCurrentTrack();
         droidifyPreferencesEditor.writeLastPlayedTrack(lastPlayedTrack);
-        droidifyPreferencesEditor.writeShuffleOn(shuffle);
+
+        final boolean shuffleOn = droidifyPlayer.isShuffleOn();
+        droidifyPreferencesEditor.writeShuffleOn(shuffleOn);
 
         if (droidifyPlayer != null) {
             this.unbindService(droidifyPlayerServiceConnection);
@@ -72,7 +72,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         this.droidifyPlayer = droidifyPlayer;
 
         final Button playPauseButton = (Button) this.findViewById(R.id.playPauseButton);
-        trackPlayPauseButton = TrackPlayPauseButton.Create(this.droidifyPlayer, playPauseButton, this);
+        trackPlayPauseButton = TrackPlayPauseButton.create(this.droidifyPlayer, playPauseButton, this);
 
         final RetrieveTrackListTask retrieveTrackListTask = new RetrieveTrackListTask(getContentResolver(), this);
         retrieveTrackListTask.execute(musicDirectory);
@@ -102,7 +102,9 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
         droidifyPlayer.changePlaylist(resourcePaths);
 
-        toggleShuffle();
+        final Button shuffleButton = (Button) this.findViewById(R.id.shuffleButton);
+        final boolean shuffleOn = droidifyPreferencesEditor.readShuffleOn();
+        this.trackShuffleButton = TrackShuffleButton.create(shuffleButton, droidifyPlayer, shuffleOn);
 
         // TODO: Fix
         this.trackListView.changeSelection(currentSelection);
@@ -120,22 +122,5 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
 
     public void onForwardButtonClick(final View view) {
         droidifyPlayer.skipForward();
-    }
-
-    public void onShuffleButtonClick(final View view) {
-        shuffle = !shuffle;
-        toggleShuffle();
-    }
-
-    private void toggleShuffle() {
-        final Button shuffleButton = (Button) this.findViewById(R.id.shuffleButton);
-
-        droidifyPlayer.toggleShuffle(shuffle);
-
-        if (shuffle) {
-            shuffleButton.setBackgroundResource(R.drawable.shuffle_button_on);
-        } else {
-            shuffleButton.setBackgroundResource(R.drawable.shuffle_button_off);
-        }
     }
 }

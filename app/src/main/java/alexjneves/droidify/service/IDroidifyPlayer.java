@@ -12,4 +12,5 @@ public interface IDroidifyPlayer {
     void toggleShuffle(final boolean on);
     void registerStateChangeListener(final IDroidifyPlayerStateChangeListener droidifyPlayerStateChangeListener);
     String getCurrentTrack();
+    boolean isShuffleOn();
 }

@@ -134,6 +134,11 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     }
 
     @Override
+    public boolean isShuffleOn() {
+        return shuffle;
+    }
+
+    @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         changeState(DroidifyPlayerState.STOPPED);
         this.stopForeground(true);
