@@ -58,13 +58,13 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     protected void onDestroy() {
         super.onDestroy();
 
-        final String lastPlayedTrack = droidifyPlayer.getCurrentTrack();
-        droidifyPreferencesEditor.writeLastPlayedTrack(lastPlayedTrack);
-
-        final boolean shuffleOn = droidifyPlayer.isShuffleOn();
-        droidifyPreferencesEditor.writeShuffleOn(shuffleOn);
-
         if (droidifyPlayer != null) {
+            final String lastPlayedTrack = droidifyPlayer.getCurrentTrack();
+            droidifyPreferencesEditor.writeLastPlayedTrack(lastPlayedTrack);
+
+            final boolean shuffleOn = droidifyPlayer.isShuffleOn();
+            droidifyPreferencesEditor.writeShuffleOn(shuffleOn);
+
             this.unbindService(droidifyPlayerServiceConnection);
         }
 

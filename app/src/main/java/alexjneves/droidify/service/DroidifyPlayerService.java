@@ -1,6 +1,6 @@
 package alexjneves.droidify.service;
 
-import android.app.Service;
+import android.app.IntentService;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -11,7 +11,11 @@ import java.util.List;
 
 import alexjneves.droidify.TrackChangedBroadcastReceiver;
 
-public final class DroidifyPlayerService extends Service implements IDroidifyPlayer, ITrackCompleteListener, ITrackChangedListener {
+public final class DroidifyPlayerService extends IntentService implements IDroidifyPlayer, ITrackCompleteListener, ITrackChangedListener {
+    public static final String PAUSE_PLAYBACK_INTENT_ACTION = "PausePlayback";
+
+    private static final String SERVICE_NAME = "DroidifyPlayerService";
+
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
     private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
 
@@ -23,6 +27,8 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     private boolean autoPlay;
 
     public DroidifyPlayerService() {
+        super(SERVICE_NAME);
+
         droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder();
         stateChangeListeners = new ArrayList<>();
 
@@ -38,6 +44,7 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     public void onCreate() {
         super.onCreate();
         audioFocusHandler = new AudioFocusHandler(this, this);
+        playlistController = new PlaylistController(new ArrayList<String>(), getApplicationContext(), this);
     }
 
     @Override
@@ -50,6 +57,15 @@ public final class DroidifyPlayerService extends Service implements IDroidifyPla
     @Override
     public IBinder onBind(final Intent intent) {
         return droidifyPlayerServiceBinder;
+    }
+
+    @Override
+    protected void onHandleIntent(final Intent intent) {
+        final String intentAction = intent.getAction();
+
+        if (intentAction.equals(PAUSE_PLAYBACK_INTENT_ACTION)) {
+            pauseCurrentTrack();
+        }
     }
 
     @Override
