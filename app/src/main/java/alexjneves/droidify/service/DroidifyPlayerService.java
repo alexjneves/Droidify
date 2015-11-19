@@ -111,16 +111,20 @@ public final class DroidifyPlayerService extends IntentService implements IDroid
 
     @Override
     public void skipForward() {
-        final PlayableTrack nextTrack = playlistController.getNextTrack();
-        changeTrack(nextTrack.getResourcePath());
-        playCurrentTrack();
+        if (droidifyPlayerState == DroidifyPlayerState.PLAYING || droidifyPlayerState == DroidifyPlayerState.PAUSED) {
+            final PlayableTrack nextTrack = playlistController.getNextTrack();
+            changeTrack(nextTrack.getResourcePath());
+            playCurrentTrack();
+        }
     }
 
     @Override
     public void skipBackward() {
-        final PlayableTrack previousTrack = playlistController.getPreviousTrack();
-        changeTrack(previousTrack.getResourcePath());
-        playCurrentTrack();
+        if (droidifyPlayerState == DroidifyPlayerState.PLAYING || droidifyPlayerState == DroidifyPlayerState.PAUSED) {
+            final PlayableTrack previousTrack = playlistController.getPreviousTrack();
+            changeTrack(previousTrack.getResourcePath());
+            playCurrentTrack();
+        }
     }
 
     @Override

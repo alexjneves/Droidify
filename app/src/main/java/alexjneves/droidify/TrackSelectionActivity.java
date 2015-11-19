@@ -149,10 +149,14 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     }
 
     public void onBackwardButtonClick(final View view) {
-        droidifyPlayer.skipBackward();
+        if (droidifyPlayer != null) {
+            droidifyPlayer.skipBackward();
+        }
     }
 
     public void onForwardButtonClick(final View view) {
-        droidifyPlayer.skipForward();
+        if (droidifyPlayer != null) {
+            droidifyPlayer.skipForward();
+        }
     }
 }
