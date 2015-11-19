@@ -151,7 +151,13 @@ public final class DroidifyPlayerService extends IntentService implements IDroid
 
     @Override
     public String getCurrentTrack() {
-        return playlistController.getCurrentTrack().getResourcePath();
+        final PlayableTrack currentTrack = playlistController.getCurrentTrack();
+
+        if (currentTrack != null) {
+            return currentTrack.getResourcePath();
+        }
+
+        return "";
     }
 
     @Override

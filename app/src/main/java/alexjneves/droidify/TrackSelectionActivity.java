@@ -132,17 +132,19 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     private void trySetPreviouslyPlayedTrack(final List<String> resourcePaths) {
         final String lastPlayedTrack = droidifyPreferencesEditor.readLastPlayedTrack();
 
-        boolean exists = false;
+        boolean trackExists = false;
 
         for (final String resourcePath : resourcePaths) {
             if (resourcePath.equals(lastPlayedTrack)) {
-                exists = true;
+                trackExists = true;
                 break;
             }
         }
 
-        if (exists) {
+        if (trackExists) {
             droidifyPlayer.changeTrack(lastPlayedTrack);
+        } else if (!resourcePaths.isEmpty()) {
+            droidifyPlayer.changeTrack(resourcePaths.get(0));
         }
     }
 
