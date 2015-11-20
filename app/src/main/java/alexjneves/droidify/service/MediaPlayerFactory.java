@@ -8,6 +8,11 @@ import android.os.PowerManager;
 
 import java.io.IOException;
 
+/**
+ * This factory will create media players for a particular audio resource.
+ * It takes care of registering a completion listener, setting the correct stream type and
+ * prepares the player so it is ready for playback.
+ */
 final class MediaPlayerFactory {
     private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
     private final Context applicationContext;

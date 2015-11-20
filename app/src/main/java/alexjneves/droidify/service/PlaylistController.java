@@ -8,6 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A playlist which contains a circular list of tracks to be played.
+ * Provides functions to control the playback, including play, pause and changing the current track.
+ * Offers a shuffle function which will randomise the order of playback while retaining the circular
+ * queue.
+ */
 final class PlaylistController implements ITrackCompleteListener {
     private final Context applicationContext;
     private final ITrackChangedListener trackChangedListener;

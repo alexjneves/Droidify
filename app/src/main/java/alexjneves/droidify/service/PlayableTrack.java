@@ -6,6 +6,10 @@ import android.media.MediaPlayer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An abstraction of a playable audio file. Wraps the media player to reduce the dependency chain.
+ * Exposes only the media player functionality that the droidify player service is interested in.
+ */
 final class PlayableTrack implements MediaPlayer.OnCompletionListener {
     private final String resourcePath;
     private final List<ITrackCompleteListener> trackCompleteListeners;

@@ -2,6 +2,10 @@ package alexjneves.droidify.service;
 
 import android.app.Notification;
 
+/**
+ * A notifier that will respond to droidify player state changes, using the injected notification
+ * factory to create appropriate notifications and then display them on the device.
+ */
 final class DroidifyPlayerServiceNotifier implements IDroidifyPlayerStateChangeListener{
     private static final int DROIDIFY_PLAYER_SERVICE_NOTIFICATION_ID = 1;
 

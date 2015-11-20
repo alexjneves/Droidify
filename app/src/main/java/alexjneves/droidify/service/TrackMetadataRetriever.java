@@ -2,6 +2,10 @@ package alexjneves.droidify.service;
 
 import android.media.MediaMetadataRetriever;
 
+/**
+ * A convenient wrapper around the MediaMetadataRetriever to allow easy extraction of an audio
+ * resources metadata.
+ */
 final class TrackMetadataRetriever {
     private final String trackName;
     private final String trackArtist;

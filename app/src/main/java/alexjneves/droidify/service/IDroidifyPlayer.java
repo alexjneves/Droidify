@@ -2,6 +2,10 @@ package alexjneves.droidify.service;
 
 import java.util.List;
 
+/**
+ * The music player server that the app will interact with. Provides functions which control
+ * track playback.
+ */
 public interface IDroidifyPlayer {
     /**
      * Change the current track. This will prepare the resource but not automatically
