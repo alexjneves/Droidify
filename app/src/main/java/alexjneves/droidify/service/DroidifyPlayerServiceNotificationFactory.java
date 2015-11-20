@@ -7,6 +7,10 @@ import android.content.Intent;
 
 import alexjneves.droidify.TrackSelectionActivity;
 
+/**
+ * Factory to build various notifications that the droidify player service may want to display to
+ * indicate to the user its current state.
+ */
 final class DroidifyPlayerServiceNotificationFactory {
     private static final int REQUEST_CODE = 0;
 

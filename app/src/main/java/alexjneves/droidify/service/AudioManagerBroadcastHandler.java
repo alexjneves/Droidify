@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 
+/**
+ * Responsible for receiving the system broadcast indicating that the audio output hardware has
+ * changed.
+ */
 public final class AudioManagerBroadcastHandler extends BroadcastReceiver {
 
     @Override

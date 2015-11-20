@@ -3,6 +3,10 @@ package alexjneves.droidify.service;
 import android.content.Context;
 import android.media.AudioManager;
 
+/**
+ * Responsible for handling audio focus, responding appropriately to system events which indicate
+ * the audio focus state has changed. Provides methods for requesting and releasing audio focus.
+ */
 public final class AudioFocusHandler implements AudioManager.OnAudioFocusChangeListener {
     private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
     private static final float MAX_VOLUME = 1.0f;
