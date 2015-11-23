@@ -2,6 +2,6 @@ package alexjneves.droidify;
 
 import alexjneves.droidify.service.IDroidifyPlayer;
 
-public interface IDroidifyPlayerRetrievedListener {
+interface IDroidifyPlayerRetrievedListener {
     void onDroidifyPlayerRetrieved(final IDroidifyPlayer droidifyPlayer);
 }

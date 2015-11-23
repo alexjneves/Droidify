@@ -20,7 +20,6 @@ import alexjneves.droidify.service.IDroidifyPlayer;
 public final class TrackSelectionActivity extends AppCompatActivity implements IRunOnUiThread, IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener {
     private final TrackListViewAdapterFactory trackListViewAdapterFactory;
 
-    private String musicDirectory;
     private IDroidifyPlayer droidifyPlayer;
     private DroidifyPlayerServiceConnection droidifyPlayerServiceConnection;
     private TrackPlayPauseButton trackPlayPauseButton;
@@ -32,7 +31,6 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     public TrackSelectionActivity() {
         trackListViewAdapterFactory = new TrackListViewAdapterFactory();
 
-        musicDirectory = null;
         droidifyPlayer = null;
         trackPlayPauseButton = null;
         trackShuffleButton = null;
@@ -86,7 +84,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         trackPlayPauseButton = TrackPlayPauseButton.create(this.droidifyPlayer, playPauseButton, this);
 
         final RetrieveTrackListTask retrieveTrackListTask = new RetrieveTrackListTask(getContentResolver(), this);
-        retrieveTrackListTask.execute(musicDirectory);
+        retrieveTrackListTask.execute();
     }
 
     @Override

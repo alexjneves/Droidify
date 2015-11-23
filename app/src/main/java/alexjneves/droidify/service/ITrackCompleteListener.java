@@ -1,5 +1,5 @@
 package alexjneves.droidify.service;
 
-public interface ITrackCompleteListener {
+interface ITrackCompleteListener {
     void onTrackComplete();
 }

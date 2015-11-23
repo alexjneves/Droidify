@@ -11,13 +11,12 @@ final class DroidifyPlayerServiceNotificationFactory {
     private static final int REQUEST_CODE = 0;
 
     private final Context applicationContext;
-    private final TrackMetadataRetriever trackMetadataRetriever;
     private final String notificationContent;
 
     public DroidifyPlayerServiceNotificationFactory(final String resourcePath, final Context applicationContext) {
         this.applicationContext = applicationContext;
 
-        this.trackMetadataRetriever = new TrackMetadataRetriever(resourcePath);
+        final TrackMetadataRetriever trackMetadataRetriever = new TrackMetadataRetriever(resourcePath);
         this.notificationContent = trackMetadataRetriever.getTrackName() + " - " + trackMetadataRetriever.getTrackArtist();
     }
 

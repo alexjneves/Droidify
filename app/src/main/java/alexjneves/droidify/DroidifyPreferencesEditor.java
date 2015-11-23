@@ -2,7 +2,7 @@ package alexjneves.droidify;
 
 import android.content.SharedPreferences;
 
-public final class DroidifyPreferencesEditor {
+final class DroidifyPreferencesEditor {
     private static final String LAST_PLAYED_TRACK_KEY = "LastPlayedTrack";
     private static final String LAST_PLAYED_TRACK_DEFAULT = "NonExistentTrack";
 

@@ -1,6 +1,6 @@
 package alexjneves.droidify;
 
-public final class Track {
+final class Track {
     private final String title;
     private final String artist;
     private final String resourcePath;

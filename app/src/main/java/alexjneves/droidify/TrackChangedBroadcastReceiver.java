@@ -7,8 +7,8 @@ import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
 public final class TrackChangedBroadcastReceiver {
-    public static final String TRACK_CHANGED_BROADCAST_KEY = "TrackChangedBroadcast";
-    public static final String TRACK_RESOURCE_PATH_KEY = "TrackResourcePath";
+    private static final String TRACK_CHANGED_BROADCAST_KEY = "TrackChangedBroadcast";
+    private static final String TRACK_RESOURCE_PATH_KEY = "TrackResourcePath";
 
     private final Context context;
     private final TrackListView trackListView;

@@ -5,7 +5,7 @@ import android.os.AsyncTask;
 
 import java.util.List;
 
-public final class RetrieveTrackListTask extends AsyncTask<String, Void, List<Track>> {
+final class RetrieveTrackListTask extends AsyncTask<String, Void, List<Track>> {
     private final DeviceAudioMediaRetriever deviceAudioMediaRetriever;
     private final ITrackListRetrievedListener trackListRetrievedListener;
 

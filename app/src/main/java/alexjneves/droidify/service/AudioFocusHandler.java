@@ -3,7 +3,7 @@ package alexjneves.droidify.service;
 import android.content.Context;
 import android.media.AudioManager;
 
-public final class AudioFocusHandler implements AudioManager.OnAudioFocusChangeListener {
+final class AudioFocusHandler implements AudioManager.OnAudioFocusChangeListener {
     private static final int STREAM_TYPE = AudioManager.STREAM_MUSIC;
     private static final float MAX_VOLUME = 1.0f;
     private static final float MIN_VOLUME = 1.0f;

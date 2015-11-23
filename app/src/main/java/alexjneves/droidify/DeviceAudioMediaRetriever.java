@@ -8,7 +8,7 @@ import android.provider.MediaStore;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DeviceAudioMediaRetriever {
+final class DeviceAudioMediaRetriever {
     private final Uri contentUri;
     private final String[] columnsToRetrieve;
     private final String musicOnlyFilter;
@@ -54,6 +54,8 @@ public final class DeviceAudioMediaRetriever {
 
             tracks.add(new Track(title, artist, resourcePath));
         }
+
+        cursor.close();
 
         return tracks;
     }

@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class TrackListViewAdapterFactory {
+final class TrackListViewAdapterFactory {
     private static final String TRACK_LIST_VIEW_MAIN_TEXT = "title";
     private static final String TRACK_LIST_VIEW_SUB_TEXT = "artist";
 

@@ -7,7 +7,7 @@ import java.util.List;
 
 import alexjneves.droidify.service.IDroidifyPlayer;
 
-public final class OnTrackClickListener implements AdapterView.OnItemClickListener {
+final class OnTrackClickListener implements AdapterView.OnItemClickListener {
     private final List<Track> tracks;
     private final IDroidifyPlayer droidifyPlayer;
 

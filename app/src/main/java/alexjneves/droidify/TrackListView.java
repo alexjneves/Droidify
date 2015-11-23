@@ -6,19 +6,15 @@ import android.widget.ListView;
 
 import java.util.List;
 
-public final class TrackListView {
+final class TrackListView {
     private final ListView trackListView;
     private final List<Track> tracks;
-    private final ListAdapter listAdapter;
-    private final OnTrackClickListener onTrackClickListener;
     private final IRunOnUiThread runOnUiThread;
     private View currentSelectedItem;
 
     public TrackListView(final ListView trackListView, final List<Track> tracks, final ListAdapter listAdapter, final OnTrackClickListener onTrackClickListener, final IRunOnUiThread runOnUiThread) {
         this.trackListView = trackListView;
         this.tracks = tracks;
-        this.listAdapter = listAdapter;
-        this.onTrackClickListener = onTrackClickListener;
         this.runOnUiThread = runOnUiThread;
         this.currentSelectedItem = null;
 

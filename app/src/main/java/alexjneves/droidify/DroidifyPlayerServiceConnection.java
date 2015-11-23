@@ -7,7 +7,7 @@ import android.os.IBinder;
 import alexjneves.droidify.service.IDroidifyPlayer;
 import alexjneves.droidify.service.IDroidifyPlayerServiceBinder;
 
-public final class DroidifyPlayerServiceConnection implements ServiceConnection {
+final class DroidifyPlayerServiceConnection implements ServiceConnection {
     private final IDroidifyPlayerRetrievedListener droidifyPlayerRetrievedListener;
 
     public DroidifyPlayerServiceConnection(final IDroidifyPlayerRetrievedListener droidifyPlayerRetrievedListener) {

@@ -1,5 +1,5 @@
 package alexjneves.droidify;
 
-public interface IRunOnUiThread {
+interface IRunOnUiThread {
     void executeOnUiThread(final Runnable toRun);
 }
