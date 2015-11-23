@@ -8,6 +8,10 @@ import android.provider.MediaStore;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A lightweight wrapper for the ContentResolver. Knows how to build the relevant query to retrieve
+ * information about the available audio content on the device.
+ */
 public final class DeviceAudioMediaRetriever {
     private final Uri contentUri;
     private final String[] columnsToRetrieve;

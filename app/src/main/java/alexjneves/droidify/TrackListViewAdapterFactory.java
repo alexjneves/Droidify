@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A factory for constructing the adapter to be attached to our TrackListView. The adapter is the
+ * component which populates the ListView UI element with child elements, which in our case display
+ * the tracks name and artist name.
+ */
 public final class TrackListViewAdapterFactory {
     private static final String TRACK_LIST_VIEW_MAIN_TEXT = "title";
     private static final String TRACK_LIST_VIEW_SUB_TEXT = "artist";

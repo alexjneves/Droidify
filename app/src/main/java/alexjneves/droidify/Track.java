@@ -1,5 +1,9 @@
 package alexjneves.droidify;
 
+/**
+ * A DTO to represent a Track on the device, containing only the information needed for updating the
+ * UI and triggering playback.
+ */
 public final class Track {
     private final String title;
     private final String artist;

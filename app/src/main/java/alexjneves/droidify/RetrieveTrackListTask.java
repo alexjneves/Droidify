@@ -5,6 +5,10 @@ import android.os.AsyncTask;
 
 import java.util.List;
 
+/**
+ * An asynchronous task to retrieve information about the available audio media on the device.
+ * Triggers the custom callback when retrieval has completed.
+ */
 public final class RetrieveTrackListTask extends AsyncTask<String, Void, List<Track>> {
     private final DeviceAudioMediaRetriever deviceAudioMediaRetriever;
     private final ITrackListRetrievedListener trackListRetrievedListener;

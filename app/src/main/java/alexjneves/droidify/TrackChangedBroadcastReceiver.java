@@ -6,6 +6,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
+/**
+ * A local broadcast receiver to send/receive track changed events. This event is primarily
+ * triggered by the DroidifyPlayerService and listened to by the TrackSelectionActivity in order to
+ * update the UI accordingly. Contains a static helper function
+ * {@link #sendBroadcast(Context, String)} to provide easy triggering of such events.
+ */
 public final class TrackChangedBroadcastReceiver {
     public static final String TRACK_CHANGED_BROADCAST_KEY = "TrackChangedBroadcast";
     public static final String TRACK_RESOURCE_PATH_KEY = "TrackResourcePath";

@@ -7,6 +7,11 @@ import alexjneves.droidify.service.DroidifyPlayerState;
 import alexjneves.droidify.service.IDroidifyPlayer;
 import alexjneves.droidify.service.IDroidifyPlayerStateChangeListener;
 
+/**
+ * The controller for the dynamic play/pause button. Handles interaction with the widget as well as
+ * updating the widget as appropriate. Listens to state change of the Droidify Player to ensure the
+ * UI is relevant to the to current context.
+ */
 public final class TrackPlayPauseButton implements IDroidifyPlayerStateChangeListener, View.OnClickListener {
     private final IDroidifyPlayer droidifyPlayer;
     private final Button uiButton;

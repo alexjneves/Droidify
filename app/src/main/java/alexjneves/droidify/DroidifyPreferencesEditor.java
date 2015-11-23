@@ -2,6 +2,10 @@ package alexjneves.droidify;
 
 import android.content.SharedPreferences;
 
+/**
+ * A wrapper around SharedPreferences to allow easy storage and retrieval of application data
+ * we wish to store.
+ */
 public final class DroidifyPreferencesEditor {
     private static final String LAST_PLAYED_TRACK_KEY = "LastPlayedTrack";
     private static final String LAST_PLAYED_TRACK_DEFAULT = "NonExistentTrack";

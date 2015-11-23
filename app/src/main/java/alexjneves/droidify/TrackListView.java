@@ -6,6 +6,10 @@ import android.widget.ListView;
 
 import java.util.List;
 
+/**
+ * The controller for our ListView UI which displays all playable tracks on the device. Knows how to
+ * update the UI as appropriate and register the necessary components to the ListView.
+ */
 public final class TrackListView {
     private final ListView trackListView;
     private final List<Track> tracks;

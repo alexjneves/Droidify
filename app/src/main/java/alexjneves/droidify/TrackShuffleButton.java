@@ -5,6 +5,10 @@ import android.widget.Button;
 
 import alexjneves.droidify.service.IDroidifyPlayer;
 
+/**
+ * The controller for the dynamic shuffle button. Handles the onClick as well as updating the UI
+ * as appropriate.
+ */
 public final class TrackShuffleButton implements View.OnClickListener{
     private final Button shuffleButton;
     private final IDroidifyPlayer droidifyPlayer;

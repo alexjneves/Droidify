@@ -7,6 +7,10 @@ import java.util.List;
 
 import alexjneves.droidify.service.IDroidifyPlayer;
 
+/**
+ * A simple listener to control the interaction with the track list UI. When an item is selected,
+ * we want to start the playback of that track.
+ */
 public final class OnTrackClickListener implements AdapterView.OnItemClickListener {
     private final List<Track> tracks;
     private final IDroidifyPlayer droidifyPlayer;

@@ -17,6 +17,14 @@ import alexjneves.droidify.service.IDroidifyPlayer;
 
 // TODO: Handle Service Error State
 
+/**
+ * The single activity for the Droidify application. Binds to the Droidify Player Service on
+ * creation and unbinds on destroy. Allows playback to continue when the application is running in
+ * the background. Reads/Writes application data on creation/destruction, including the previously
+ * played track and the user's shuffle preference. Handles the initial set up of application, which
+ * consists of retrieving the Service Binder, reading available audio media on the device and hooking
+ * up all the UI controllers to the corresponding UI elements.
+ */
 public final class TrackSelectionActivity extends AppCompatActivity implements IRunOnUiThread, IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener {
     private final TrackListViewAdapterFactory trackListViewAdapterFactory;
 

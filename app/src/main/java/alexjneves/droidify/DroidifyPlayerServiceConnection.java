@@ -7,6 +7,10 @@ import android.os.IBinder;
 import alexjneves.droidify.service.IDroidifyPlayer;
 import alexjneves.droidify.service.IDroidifyPlayerServiceBinder;
 
+/**
+ * The ServiceConnection implementation used to handle the retrieval of the Droidify Service Binder.
+ * Triggers a custom callback when the asynchronous service binder request completes.
+ */
 public final class DroidifyPlayerServiceConnection implements ServiceConnection {
     private final IDroidifyPlayerRetrievedListener droidifyPlayerRetrievedListener;
 
