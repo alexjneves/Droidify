@@ -93,7 +93,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     @Override
     public void onTrackListRetrieved(final List<Track> tracks) {
         trackListView = createTrackListView(tracks);
-        trackChangedBroadcastReceiver = new TrackChangedBroadcastReceiver(this, trackListView);
+        trackChangedBroadcastReceiver = new TrackChangedBroadcastReceiver(this, this, trackListView);
 
         final List<String> resourcePaths = getTrackResourceIds(tracks);
         droidifyPlayer.changePlaylist(resourcePaths);

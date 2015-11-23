@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import alexjneves.droidify.TrackMetadataRetriever;
 import alexjneves.droidify.TrackSelectionActivity;
 
 final class DroidifyPlayerServiceNotificationFactory {

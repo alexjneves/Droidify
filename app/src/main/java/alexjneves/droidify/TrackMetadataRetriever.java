@@ -1,8 +1,8 @@
-package alexjneves.droidify.service;
+package alexjneves.droidify;
 
 import android.media.MediaMetadataRetriever;
 
-final class TrackMetadataRetriever {
+public final class TrackMetadataRetriever {
     private final String trackName;
     private final String trackArtist;
 
