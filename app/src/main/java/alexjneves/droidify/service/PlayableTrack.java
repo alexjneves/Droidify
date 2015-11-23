@@ -23,7 +23,7 @@ final class PlayableTrack implements MediaPlayer.OnCompletionListener {
         return resourcePath;
     }
 
-    public void play() {
+    public void play() throws FailedToRetrieveMediaException {
         if (mediaPlayer == null) {
             mediaPlayer = mediaPlayerFactory.createPreparedPlayer(this);
         }

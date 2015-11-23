@@ -8,16 +8,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import alexjneves.droidify.service.DroidifyPlayerService;
 import alexjneves.droidify.service.IDroidifyPlayer;
+import alexjneves.droidify.service.IDroidifyPlayerOnErrorListener;
 
-// TODO: Handle Service Error State
-
-public final class TrackSelectionActivity extends AppCompatActivity implements IRunOnUiThread, IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener {
+public final class TrackSelectionActivity extends AppCompatActivity implements IRunOnUiThread, IDroidifyPlayerRetrievedListener, ITrackListRetrievedListener, IDroidifyPlayerOnErrorListener {
     private final TrackListViewAdapterFactory trackListViewAdapterFactory;
 
     private IDroidifyPlayer droidifyPlayer;
@@ -27,6 +27,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     private TrackListView trackListView;
     private DroidifyPreferencesEditor droidifyPreferencesEditor;
     private TrackChangedBroadcastReceiver trackChangedBroadcastReceiver;
+    private Toast errorMessageToast;
 
     public TrackSelectionActivity() {
         trackListViewAdapterFactory = new TrackListViewAdapterFactory();
@@ -44,10 +45,11 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_track_selection);
 
+        errorMessageToast = Toast.makeText(this, "", Toast.LENGTH_LONG);
+
         droidifyPlayerServiceConnection = new DroidifyPlayerServiceConnection(this);
         droidifyPreferencesEditor = new DroidifyPreferencesEditor(getPreferences(MODE_PRIVATE));
 
-        // TODO: Investigate different bind constants
         final Intent startDroidifyPlayerServiceIntent = new Intent(this, DroidifyPlayerService.class);
         this.bindService(startDroidifyPlayerServiceIntent, droidifyPlayerServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -79,6 +81,7 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
     @Override
     public void onDroidifyPlayerRetrieved(final IDroidifyPlayer droidifyPlayer) {
         this.droidifyPlayer = droidifyPlayer;
+        this.droidifyPlayer.registerOnErrorListener(this);
 
         final Button playPauseButton = (Button) this.findViewById(R.id.playPauseButton);
         trackPlayPauseButton = TrackPlayPauseButton.create(this.droidifyPlayer, playPauseButton, this);
@@ -144,6 +147,12 @@ public final class TrackSelectionActivity extends AppCompatActivity implements I
         } else if (!resourcePaths.isEmpty()) {
             droidifyPlayer.changeTrack(resourcePaths.get(0));
         }
+    }
+
+    @Override
+    public void onDroidifyPlayerError(final String errorMessage) {
+        errorMessageToast.setText(errorMessage);
+        errorMessageToast.show();
     }
 
     public void onBackwardButtonClick(final View view) {

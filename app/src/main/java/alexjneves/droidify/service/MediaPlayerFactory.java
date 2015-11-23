@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.PowerManager;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -18,7 +19,7 @@ final class MediaPlayerFactory {
         this.resourcePath = resourcePath;
     }
 
-    public MediaPlayer createPreparedPlayer(final MediaPlayer.OnCompletionListener onCompletionListener) {
+    public MediaPlayer createPreparedPlayer(final MediaPlayer.OnCompletionListener onCompletionListener) throws FailedToRetrieveMediaException {
         final MediaPlayer mediaPlayer = new MediaPlayer();
 
         mediaPlayer.setAudioStreamType(STREAM_TYPE);
@@ -29,10 +30,16 @@ final class MediaPlayerFactory {
             mediaPlayer.setDataSource(applicationContext, Uri.parse(resourcePath));
             mediaPlayer.prepare();
         } catch (final IOException ex) {
-            // TODO: Error handling callback
-            throw new RuntimeException();
+            final String errorMessage = createErrorMessage(resourcePath);
+            throw new FailedToRetrieveMediaException(errorMessage);
         }
 
         return mediaPlayer;
+    }
+
+    private String createErrorMessage(final String resourcePath) {
+        return "Unable to retrieve device media for:\n"
+                + resourcePath
+                + "\nPlease close any contending applications and try again.";
     }
 }

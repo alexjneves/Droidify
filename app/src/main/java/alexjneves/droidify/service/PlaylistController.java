@@ -42,7 +42,7 @@ final class PlaylistController implements ITrackCompleteListener {
         trackChangedListener.onTrackChanged(resourcePath);
     }
 
-    public void playCurrentTrack() {
+    public void playCurrentTrack() throws FailedToRetrieveMediaException {
         currentTrack.play();
     }
 

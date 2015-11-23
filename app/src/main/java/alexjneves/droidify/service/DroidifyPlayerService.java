@@ -18,6 +18,7 @@ public final class DroidifyPlayerService extends IntentService implements IDroid
 
     private final DroidifyPlayerServiceBinder droidifyPlayerServiceBinder;
     private final List<IDroidifyPlayerStateChangeListener> stateChangeListeners;
+    private final List<IDroidifyPlayerOnErrorListener> onErrorListeners;
 
     private AudioFocusHandler audioFocusHandler;
     private PlaylistController playlistController;
@@ -31,6 +32,7 @@ public final class DroidifyPlayerService extends IntentService implements IDroid
 
         droidifyPlayerServiceBinder = new DroidifyPlayerServiceBinder();
         stateChangeListeners = new ArrayList<>();
+        onErrorListeners = new ArrayList<>();
 
         audioFocusHandler = null;
         playlistController = null;
@@ -92,12 +94,16 @@ public final class DroidifyPlayerService extends IntentService implements IDroid
     public void playCurrentTrack() {
         if (droidifyPlayerState == DroidifyPlayerState.PAUSED) {
             if (!audioFocusHandler.requestAudioFocus()) {
-                changeState(DroidifyPlayerState.ERROR);
+                enterErrorState("Unable to acquire audio focus");
                 return;
             }
 
-            playlistController.playCurrentTrack();
-            changeState(DroidifyPlayerState.PLAYING);
+            try {
+                playlistController.playCurrentTrack();
+                changeState(DroidifyPlayerState.PLAYING);
+            } catch (final FailedToRetrieveMediaException ex) {
+                enterErrorState(ex.getMessage());
+            }
         }
     }
 
@@ -154,6 +160,11 @@ public final class DroidifyPlayerService extends IntentService implements IDroid
     }
 
     @Override
+    public void registerOnErrorListener(final IDroidifyPlayerOnErrorListener droidifyPlayerOnErrorListener) {
+        onErrorListeners.add(droidifyPlayerOnErrorListener);
+    }
+
+    @Override
     public String getCurrentTrack() {
         final PlayableTrack currentTrack = playlistController.getCurrentTrack();
 
@@ -187,6 +198,14 @@ public final class DroidifyPlayerService extends IntentService implements IDroid
 
         for (final IDroidifyPlayerStateChangeListener stateChangeListener : stateChangeListeners) {
             stateChangeListener.onDroidifyPlayerStateChange(droidifyPlayerState);
+        }
+    }
+
+    private void enterErrorState(final String errorMessage) {
+        changeState(DroidifyPlayerState.ERROR);
+
+        for (final IDroidifyPlayerOnErrorListener onErrorListener : onErrorListeners) {
+            onErrorListener.onDroidifyPlayerError(errorMessage);
         }
     }
 

@@ -13,6 +13,7 @@ public interface IDroidifyPlayer {
     void toggleAutoPlay(final boolean on);
     void setVolume(final float volume);
     void registerStateChangeListener(final IDroidifyPlayerStateChangeListener droidifyPlayerStateChangeListener);
+    void registerOnErrorListener(final IDroidifyPlayerOnErrorListener droidifyPlayerOnErrorListener);
 
     String getCurrentTrack();
     boolean isShuffleOn();
