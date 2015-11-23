@@ -11,6 +11,13 @@ import java.util.List;
 
 import alexjneves.droidify.TrackChangedBroadcastReceiver;
 
+/**
+ * Implementation of IDroidifyPlayer as an IntentService. Provides long-running background audio
+ * playback. Designed to be run in the same process and hence the Binder abstraction provides
+ * direct access to the instance of this class. Contains a simple series of states to ensure
+ * actions can only be executed at appropriate times (e.g. pausing can only occur if we are in the
+ * playing state).
+ */
 public final class DroidifyPlayerService extends IntentService implements IDroidifyPlayer, ITrackCompleteListener, ITrackChangedListener {
     public static final String PAUSE_PLAYBACK_INTENT_ACTION = "PausePlayback";
 
